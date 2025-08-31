@@ -2,18 +2,18 @@ package de.hallo5000.listener;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerModInfoEvent;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
-import de.hallo5000.main.Main;
-import net.kyori.adventure.text.Component;
 
-import java.util.NoSuchElementException;
-import java.util.concurrent.ExecutionException;
+public class PlayerModInfoListener {
 
-public class onPlayerModInfo {
+    /*
+    modId = "pcf"
+    version = "1.1.7"
+    displayName = "ProxyCompatibleForge"
+     */
 
     @Subscribe
     public void onModInfo(PlayerModInfoEvent e){
-        if(e.getModInfo().getType().equals("FML2") || e.getModInfo().getType().equals("FML")){
+        /*if(e.getModInfo().getType().equals("FML2") || e.getModInfo().getType().equals("FML")){
             Main.getServer.sendMessage(Component.text("Start checking for compatibilities (Clientprotocol: " + e.getPlayer().getProtocolVersion().getProtocol()));
             for(RegisteredServer s : Main.getServer.getAllServers()){
                 try {
@@ -25,7 +25,7 @@ public class onPlayerModInfo {
                     throw new RuntimeException(ex);
                 }
             }
-        }
+        }*/
     }
 
 }

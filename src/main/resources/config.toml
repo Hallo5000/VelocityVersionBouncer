@@ -1,0 +1,4 @@
+# This config will be used to determine the order in which the servers will be tested and possible exclusion of servers
+# Exclusion (an array like: [server1,server2]) it will ignore spaces
+exclude-servers = []
+# room for more
