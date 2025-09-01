@@ -16,7 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "0.1.0-SNAPSHOT",
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.0.0-SNAPSHOT",
         url = "https://github.com/hallo5000",
         description = "This plugin redirects players to server depending on there game version",
         authors = {"Hallo5000"})

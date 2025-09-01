@@ -1,4 +1,21 @@
-# This config will be used to determine the order in which the servers will be tested and possible exclusion of servers
-# Exclusion (an array like: [server1,server2]) it will ignore spaces
+# This config is used to determine the order in which servers are tested, and optionally to exclude specific servers.
+
+# 'exclude-servers' is a string array of server names to skip during version comparison.
+# Example: ["server1", "server2"]
+# Note: Spaces outside the strings will be ignored.
 exclude-servers = []
-# room for more
+
+# 'order-mode' defines how the server list should be ordered (case-insensitive).
+# Options:
+#   "DEFAULT" - servers will be checked in alphabetical order
+#   "CUSTOM"  - use the order defined in 'server-list'
+order-mode = "DEFAULT"
+
+# 'server-list' is used only if order-mode is set to "CUSTOM".
+# It's recommended to list all your servers here and manage exclusions separately using 'exclude-servers',
+# but including only specific servers is also possible.
+server-list = []
+
+# 'first-match' determines whether the first or last matching server should be used.
+# Set to true to use the first match found, false to use the last.
+first-match = true
