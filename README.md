@@ -18,7 +18,7 @@
 - Server list is currently processed alphabetically - I'll probably make this customizable in the future.
 - The last matching server is used even if for example it's heavily modded and you're joining with the vanilla client.
 ### 📦 Installation & 🛠️ Requirements
-1. Download the `.jar` file or build it yourself (the gradle files are included).
+1. Download the `.jar` file ([here](https://github.com/Hallo5000/VelocityVersionBouncer/blob/master/build/libs/VelocityVersionBouncer-1.0-SNAPSHOT.jar)) or build it yourself (the gradle files are included).
 2. Put the file in your servers `plugins/` folder (only the proxy!) and restart the server once to generate the config file.
 3. When you're finished editing the config restart the proxy once more and everything should be working.
 _Note: this plugin may not work properly if you are not running on `Java 21` (or higher) and `Velocity 3.4.0` and above
