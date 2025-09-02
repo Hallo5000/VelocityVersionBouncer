@@ -7,6 +7,7 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import de.hallo5000.listener.KickedFromServerListener;
 import de.hallo5000.listener.PlayerChooseInitialServerListener;
 import de.hallo5000.listener.PlayerModInfoListener;
 import org.slf4j.Logger;
@@ -16,7 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.0.0-SNAPSHOT",
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.1.0-release",
         url = "https://github.com/hallo5000",
         description = "This plugin redirects players to server depending on there game version",
         authors = {"Hallo5000"})
@@ -43,10 +44,11 @@ public class Main {
     }
 
     @Subscribe
-    public void onInitialize(ProxyInitializeEvent event) {
+    public void onInitialize(ProxyInitializeEvent e) {
         toml = loadConfig();
         server.getEventManager().register(this, new PlayerModInfoListener());
         server.getEventManager().register(this, new PlayerChooseInitialServerListener());
+        server.getEventManager().register(this, new KickedFromServerListener());
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

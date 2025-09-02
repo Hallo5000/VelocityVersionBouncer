@@ -1,0 +1,75 @@
+name: Upload JAR to Modrinth
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Find and upload JAR to Modrinth
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+        run: |
+          # Stelle sicher, dass jq installiert ist (sollte bei GitHub Actions vorhanden sein)
+          if ! command -v jq &> /dev/null; then
+            echo "jq not found!"
+            exit 1
+          fi
+
+          # Find the JAR file in build/libs/
+          JAR_PATH=$(find build/libs -type f -name "VelocityVersionBouncer-*.jar" | head -n 1)
+
+          if [ ! -f "$JAR_PATH" ]; then
+            echo "Error: No JAR file found in build/libs/"
+            exit 1
+          fi
+
+          echo "Found JAR: $JAR_PATH"
+
+          # Extract the file name
+          FILE_NAME=$(basename "$JAR_PATH")
+
+          # Extract version from filename
+          VERSION_REGEX="VelocityVersionBouncer-(.*).jar"
+          if [[ $FILE_NAME =~ $VERSION_REGEX ]]; then
+            VERSION_NUMBER="${BASH_REMATCH[1]}"
+          else
+            echo "Error: Could not extract version number from file name"
+            exit 1
+          fi
+
+          echo "Version: $VERSION_NUMBER"
+
+          # Get commit message
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+
+          # Create JSON payload safely with jq
+          JSON_PAYLOAD=$(jq -n \
+            --arg name "VelocityVersionBouncer $VERSION_NUMBER" \
+            --arg version_number "$VERSION_NUMBER" \
+            --arg changelog "$COMMIT_MESSAGE" \
+            --argjson game_versions '["1.20.1"]' \
+            --arg version_type "release" \
+            --argjson loaders '["velocity"]' \
+            '{
+              name: $name,
+              version_number: $version_number,
+              changelog: $changelog,
+              game_versions: $game_versions,
+              version_type: $version_type,
+              loaders: $loaders
+            }')
+
+          # Upload to Modrinth
+          curl -X POST https://api.modrinth.com/v2/project/YOUR_PROJECT_ID/version \
+            -H "Authorization: $MODRINTH_TOKEN" \
+            -H "Content-Type: multipart/form-data" \
+            -F "data=$JSON_PAYLOAD;type=application/json" \
+            -F "file=@$JAR_PATH"

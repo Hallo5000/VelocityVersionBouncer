@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "de.hallo5000"
-version = "1.0-SNAPSHOT"
+version = "1.1.0-release"
 
 repositories {
     mavenCentral()

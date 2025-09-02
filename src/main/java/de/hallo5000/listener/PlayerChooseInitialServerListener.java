@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import static de.hallo5000.main.Main.toml;
 

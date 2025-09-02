@@ -19,3 +19,15 @@ server-list = []
 # 'first-match' determines whether the first or last matching server should be used.
 # Set to true to use the first match found, false to use the last.
 first-match = true
+
+# If enabled this option ensures that whenever a client is kicked from a server (whether during login, via /kick, or for another reason),
+# they will be automatically redirected (bounced) to another server instead of being disconnected.
+enable-fallback-bouncing = true
+# If set to true, the server the client was kicked from will be temporarily excluded from fallback options,
+# preventing the client from being sent back there during fallback-bouncing.
+exclude-previous-server = false
+# When there is a valid server name in 'explicit-fallback-server' the plugin won't search for a new server and instead only tries the specified server.
+# Leave this empty, if you'd like to diable this option (also this is disabled when enable-fallback-bouncing is set to false).
+explicit-fallback-server = ""
+
+# an [explicit-routing] option will be added in the future, with which the plugin will no longer automatically look for a matching server but takes a static routing map provided through the config
