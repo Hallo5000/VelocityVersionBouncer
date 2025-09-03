@@ -6,10 +6,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import de.hallo5000.main.Main;
 import net.kyori.adventure.text.Component;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import static de.hallo5000.main.Main.toml;
@@ -22,8 +19,9 @@ public class KickedFromServerListener {
             if(toml.getString("explicit-fallback-server").equalsIgnoreCase("")){
                 RegisteredServer firstMatch = null;
                 Main.getLogger.info("[FALLBACK] Start checking for compatibilities (Clientprotocol: " + e.getPlayer().getProtocolVersion().getProtocol() + ")");
-                Collection<RegisteredServer> serverList = Main.getServer.getAllServers();
-                if(toml.getString("order-mode").equalsIgnoreCase("CUSTOM")) serverList = toml.getList("server-list").stream().map(x -> Main.getServer.getServer((String) x).get()).toList();
+                List<RegisteredServer> serverList = new ArrayList<RegisteredServer>(Main.getServer.getAllServers());
+                if(toml.getString("order-mode").equalsIgnoreCase("CUSTOM")) serverList = new ArrayList<>(toml.getList("server-list").stream().map(x -> Main.getServer.getServer((String) x).orElse(null)).toList());
+                if(serverList.remove(null)) Main.getLogger.info("One or more of the specified servers couldn't be found!");
                 if(toml.getBoolean("exclude-previous-server")) serverList.remove(e.getServer());
                 for(RegisteredServer s : serverList){
                     if(!toml.getList("exclude-servers", Collections.emptyList()).contains(s.getServerInfo().getName())) {
@@ -43,19 +41,19 @@ public class KickedFromServerListener {
                     }
                 }
                 if(firstMatch == null){
-                    e.getPlayer().disconnect(Component.text("Diconnected: There is no server with a matching game version available!"));
-                    Main.getLogger.info("No server found for this client");
-                }
-                else{
+                    if(e.getServerKickReason().isPresent()) e.setResult(KickedFromServerEvent.DisconnectPlayer.create(e.getServerKickReason().get().append(Component.text("\nand there is no fallback server with a matching game version available."))));
+                    else e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text("There is no fallback server with a matching game version available.")));
+                    Main.getLogger.info("No fallback server found for this client");
+                } else{
                     Main.getLogger.info("Connects to: " + firstMatch.getServerInfo().getName());
                     e.setResult(KickedFromServerEvent.RedirectPlayer.create(firstMatch));
-
                 }
             }else{
                 Optional<RegisteredServer> fallback = Main.getServer.getServer(toml.getString("explicit-fallback-server"));
                 if(fallback.isPresent()) e.setResult(KickedFromServerEvent.RedirectPlayer.create(fallback.get()));
                 else{
-                    e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text(e.getServerKickReason()+"\nThe fallback server was not found.")));
+                    if(e.getServerKickReason().isPresent()) e.setResult(KickedFromServerEvent.DisconnectPlayer.create(e.getServerKickReason().get().append(Component.text("\nand the fallback server is currently unavailable."))));
+                    else e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text("The fallback server is currently unavailable.")));
                     Main.getLogger.info("It seems like the fallback server is offline and therefore " + e.getPlayer().getGameProfile().getName() + " was kicked from the server!");
                 }
             }

@@ -27,7 +27,7 @@ enable-fallback-bouncing = true
 # preventing the client from being sent back there during fallback-bouncing.
 exclude-previous-server = false
 # When there is a valid server name in 'explicit-fallback-server' the plugin won't search for a new server and instead only tries the specified server.
-# Leave this empty, if you'd like to diable this option (also this is disabled when enable-fallback-bouncing is set to false).
+# Leave this empty, if you'd like to disable this option (also this is disabled when enable-fallback-bouncing is set to false).
 explicit-fallback-server = ""
 
 # an [explicit-routing] option will be added in the future, with which the plugin will no longer automatically look for a matching server but takes a static routing map provided through the config
