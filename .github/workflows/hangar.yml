@@ -2,13 +2,12 @@ name: Publish to Hangar
 on:
   push:
     branches:
-      # Add any additional branches you want to automatically publish from
-      - main # Assuming your main branch is called 'main'
+      - main
 
 jobs:
   publish:
     # TODO: Optional, make sure the task only runs on pushes to your repository and doesn't fail on forks. Uncomment the line below and put the repo owner into the quotes
-    # if: github.repository_owner == '<YOUR USER/ORG NAME>'
+    if: github.repository_owner == 'Hallo5000'
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
@@ -22,6 +21,5 @@ jobs:
           java-version: 17
       - name: Publish
         env:
-          # Make sure you have added a repository secret in the repository's settings
           HANGAR_API_TOKEN: ${{ secrets.HANGAR_API_TOKEN }}
         run: ./gradlew build publishPluginPublicationToHangar --stacktrace
