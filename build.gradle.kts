@@ -62,6 +62,8 @@ val suffixedVersion: String = if (isRelease) {
 // Use the commit description for the changelog
 val changelogContent: String = latestCommitMessage()
 
+val README: String = File("README.md").readText(Charsets.UTF_8)
+
 // If you would like to publish releases with their proper changelogs manually, simply add an if statement with the `isRelease` variable here.
 hangarPublish {
     publications.register("plugin") {
@@ -82,5 +84,6 @@ hangarPublish {
                 platformVersions.set(versions)
             }
         }
+        pages.resourcePage(README)
     }
 }
