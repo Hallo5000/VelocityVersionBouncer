@@ -2,7 +2,7 @@ name: Publish to Hangar
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   publish:
