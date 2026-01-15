@@ -7,18 +7,40 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
+import com.velocitypowered.api.proxy.server.ServerPing;
 import de.hallo5000.listener.KickedFromServerListener;
 import de.hallo5000.listener.PlayerChooseInitialServerListener;
-import de.hallo5000.listener.PlayerModInfoListener;
 import org.slf4j.Logger;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.1.0-release",
-        url = "https://github.com/hallo5000",
+/*
+TODO:
+- Modrinth
+- distribute evenly/balance
+- explicit mapping
+- hangar update resource page
+- modlists/forge/fabric (idea: at least check the client for the right modloader so some servers are forge-only for example)
+- ViaVersion detect
+- language files
+- exclude reconnect on /kick (impossible when only acting on the proxy side)
+- config-version in config
+
+ERROR crashed server order so
+ */
+
+
+
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.1.1-SNAPSHOT",
+        url = "https://github.com/Hallo5000/VelocityVersionBouncer",
         description = "This plugin redirects players to server depending on there game version",
         authors = {"Hallo5000"})
 public class Main {
@@ -30,6 +52,10 @@ public class Main {
     public static ProxyServer getServer;
     public static Logger getLogger;
     public static Toml toml;
+    public static Toml modlistToml;
+    public static File modlistFile;
+    public static Path getDataDirectory;
+    public static HashMap<RegisteredServer, ServerPing> pingMap;
 
     @Inject
     public Main(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
@@ -39,6 +65,23 @@ public class Main {
 
         getServer = server;
         getLogger = logger;
+        getDataDirectory = dataDirectory;
+
+        for(RegisteredServer s : server.getAllServers()){
+            Main.getLogger.info("TEST");
+            s.ping().whenComplete((result, error) -> {
+                if (error != null) {
+                    Main.getLogger.warn(
+                            "Ping FAILED for " + s.getServerInfo().getName(),
+                            error
+                    );
+                }else{
+                    Main.pingMap.put(s, result);
+                    Main.getLogger.info("TEST2");
+                    Main.getLogger.info(result.toString());
+                }
+            });
+        }
 
         logger.info("Successfully loaded!");
     }
@@ -46,12 +89,23 @@ public class Main {
     @Subscribe
     public void onInitialize(ProxyInitializeEvent e) {
         toml = loadConfig();
-        server.getEventManager().register(this, new PlayerModInfoListener());
+        modlistToml = loadModlists();
+        modlistFile = loadModlistsFile();
+        pingMap = new HashMap<RegisteredServer, ServerPing>();
+
+        /*
+        CommandManager commandManager = server.getCommandManager();
+        CommandMeta commandMeta = commandManager.metaBuilder("setModpack")
+                .plugin(this)
+                .build();
+
+        commandManager.register(commandMeta, new setModpackCommand());
+        */
+
         server.getEventManager().register(this, new PlayerChooseInitialServerListener());
         server.getEventManager().register(this, new KickedFromServerListener());
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private Toml loadConfig() {
         File dataFolder = dataDirectory.toFile();
         try {
@@ -68,4 +122,52 @@ public class Main {
             return null;
         }
     }
+
+    private File loadModlistsFile() {
+        File dataFolder = dataDirectory.toFile();
+        try {
+            if(!dataFolder.exists()) {
+                dataFolder.mkdirs();
+            }
+            File file = new File(dataFolder, "modlists.toml");
+            if(!file.exists()) {
+                Files.copy(getClass().getClassLoader().getResourceAsStream("modlists.toml"), file.toPath());
+            }
+            return file;
+        } catch (IOException ex) {
+            logger.error("Could not load modlists.toml file - Please check for errors", ex);
+            return null;
+        }
+    }
+
+    private Toml loadModlists(){
+        return new Toml(new Toml().read(getClass().getClassLoader().getResourceAsStream("modlists.toml"))).read(loadModlistsFile());
+    }
+
+    public static InputStream readFromJar(File jarFile, String fileToRead) throws IOException {
+        JarFile jar =  new JarFile(jarFile);
+        Enumeration<JarEntry> entries = jar.entries();
+        while (entries.hasMoreElements()) {
+            JarEntry e = entries.nextElement();
+            if (e.getName().endsWith(fileToRead)) {
+                try {
+                    //following variant could be implemented via an overload
+                    /*File tempFile = File.createTempFile(jarFile.getName()+"-specificExtract-", ".tmp");
+                    tempFile.deleteOnExit();
+                    InputStream input = jar.getInputStream(e);
+                    try (OutputStream output = new FileOutputStream(tempFile)) {
+                        input.transferTo(output);
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+                    return tempFile;*/
+                    return jar.getInputStream(e);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        }
+        return null;
+    }
+
 }

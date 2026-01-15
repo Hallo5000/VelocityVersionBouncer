@@ -5,8 +5,8 @@
 # Note: Spaces outside the strings will be ignored.
 exclude-servers = []
 
-# 'order-mode' defines how the server list should be ordered (case-insensitive).
-# Options:
+# 'order-mode' defines how the server list should be ordered.
+# Options: (case-insensitive)
 #   "DEFAULT" - servers will be checked in alphabetical order
 #   "CUSTOM"  - use the order defined in 'server-list'
 order-mode = "DEFAULT"
@@ -16,9 +16,11 @@ order-mode = "DEFAULT"
 # but including only specific servers is also possible.
 server-list = []
 
-# 'first-match' determines whether the first or last matching server should be used.
-# Set to true to use the first match found, false to use the last.
-first-match = true
+# If enabled this option ensures that joining players will be distributed evenly over all servers
+# Options: (case-insensitive)
+#   "FIRST-MATCH" - players will be sent to the first matching server
+#   "BALANCED" - players will be evenly distributed on all matches in the order deriving from 'order-mode'
+distribution = "FIRST-MATCH"
 
 # If enabled this option ensures that whenever a client is kicked from a server (whether during login, via /kick, or for another reason),
 # they will be automatically redirected (bounced) to another server instead of being disconnected.
@@ -30,4 +32,19 @@ exclude-previous-server = false
 # Leave this empty, if you'd like to disable this option (also this is disabled when enable-fallback-bouncing is set to false).
 explicit-fallback-server = ""
 
-# an [explicit-routing] option will be added in the future, with which the plugin will no longer automatically look for a matching server but takes a static routing map provided through the config
+# This option will determine how the plugin handles servers which can't be found
+# Options: (case-insensitive)
+#   "NEXT-LEVEL" - if the last attempt used 'explicit-routing' and was clientbrand-specific the next one will be the next more-general, else it will be the same as "LIST"
+#   "LIST" - if the last attempt used 'explicit-routing' the server-list will be used, else it will just go to the next server in the server-list
+#   "DISCONNECT" - after the first routing failure the client will be kicked
+routing-failure = ""
+
+# Syntax
+#   vX.X.X - game version
+#   p000 - protocol version (Protocol Versions for every release/snapshot can be found here: https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Protocol_version_numbers)
+#   cFORGE - Client brand (for example: vanilla, forge, fabric, geyser (for player joining through GeyserMC), badlion, lunarasdfasdfasdfasdf
+# either a game version (v) or a protocol version (p) is necessary but client brands (c) are completely optional
+# when no client brand is defined the routing just takes every client joining with the defined game/protocol version
+[explicit-routing]
+# Example: v1-21-8cFORGE = "lobby-1"
+# Example: p123 = "lobby-2"

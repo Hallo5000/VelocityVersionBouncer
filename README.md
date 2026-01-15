@@ -9,17 +9,20 @@
 - There is a config.toml file located in the plugins folder (`plugins/VelocityVersionBouncer/config.toml`).
 - In the config you can do things like changing the order in which the servers are checked or excluding servers from getting checked.
 - In the config itself each option is pretty well explained (nevertheless I'll include an example config.toml at the end of this README).
+- As an optional feature this plugin also provides an extensive fallback functionality.
 ### ❓ Questions you may have:
-- **Is this also triggered when changing servers via `/server`?** No, the version checking is only triggered when connecting initially (from the multiplayer server list).
+- **Is this also triggered when changing servers via `/server`?** No, the version checking is only triggered when connecting initially (from the multiplayer server list) or when using the fallback functionality.
 - **What happens if no compatible server is found?** The client will simply be disconnected with the according note/reason.
 - **Does this work with modded minecraft servers?** If you're using setups like Ambassador+ProxyCompatibleForge [(more information)](https://docs.papermc.io/velocity/server-compatibility) this plugin will route the client based purely on their protocol version (game version), not their installed mods. _Note: This setup has only been tested with PaperMC and Forge servers._
-- **Does this plugin use a lot of CPU resources?** Not at all. The plugin is very lightweight and simply pings each server once on connection. Even in large networks, the performance impact is negligible.
-- **Can I setup fallback servers to catch kicked players? Yes this plugin includes a fallback functionality, which can be configured/toggled via the config.**
+- **Does this plugin use a lot of CPU resources?** Not at all. The plugin is very lightweight and simply pings each server once on connection. Even on large networks, the performance impact should be negligible.
 ### 📦 Installation & 🛠️ Requirements
 1. Download the `.jar` file ([here](https://github.com/Hallo5000/VelocityVersionBouncer/blob/master/build/libs/VelocityVersionBouncer-1.1.0-release.jar)) or build it yourself (the gradle files are included).
 2. Put the file in your servers `plugins/` folder (only the proxy!) and restart the server once to generate the config file.
 3. When you're finished editing the config restart the proxy once more and everything should be working.
 _Note: this plugin may not work properly if you are not running on `Java 21` (or higher) and `Velocity 3.4.0` or above_
+
+### Known Bugs:
+- Some mods modify the servers ping request resulting in an error in velocity and a failed routing. This is probably the case if you see something like this: ``Packet sent for class com.velocitypowered.proxy.protocol.packet.StatusResponsePacket was too big (expected 156 bytes, got 220 bytes)`` in your velocity console. (I'm currently working on a solution)
 
 ## Example Config:
 ```toml

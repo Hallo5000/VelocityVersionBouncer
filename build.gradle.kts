@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "de.hallo5000"
-version = "1.1.0-release"
+version = "1.1.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -60,16 +60,16 @@ val suffixedVersion: String = if (isRelease) {
 }
 
 // Use the commit description for the changelog
-val changelogContent: String = latestCommitMessage()
+//val changelogContent: String = latestCommitMessage()
+//replaced by CHANGELOG env-var
 
-val README: String = File("README.md").readText(Charsets.UTF_8)
+val README: String = project.file("README.md").readText(Charsets.UTF_8)
 
-// If you would like to publish releases with their proper changelogs manually, simply add an if statement with the `isRelease` variable here.
 hangarPublish {
     publications.register("plugin") {
         version.set(versionString) //originally suffixedVersion but I include 'release' or 'SNAPSHOT' in the version
         channel.set(if (isRelease) "Release" else "Snapshot")
-        changelog.set(changelogContent)
+        changelog.set(System.getenv("CHANGELOG"))
         id.set("VelocityVersionBouncer")
         apiKey.set(System.getenv("HANGAR_API_TOKEN"))
         platforms {
