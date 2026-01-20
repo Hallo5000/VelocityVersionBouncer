@@ -23,7 +23,6 @@ import java.util.jar.JarFile;
 /*
 TODO:
 - Modrinth
-- distribute evenly/balance
 - explicit mapping
 - hangar update resource page
 - modlists/forge/fabric (idea: at least check the client for the right modloader so some servers are forge-only for example)

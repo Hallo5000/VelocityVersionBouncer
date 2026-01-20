@@ -1,13 +1,13 @@
-# This config is used to determine the order in which servers are tested, and optionally to exclude specific servers.
+# This config is used to determine how and if servers are checked for their protocol versions whenevery a client logs in (and optionally if they lost connection)
 
-# 'whitelist' is a string array of server names to skip during version comparison.
+# 'whitelist' is a string array of server names to check for their protocol version when a client tries to connect.
 # leaving this empty is equal to putting all registered servers in
 # Example: ["server1", "server2"]
 # Note: Spaces outside the strings will be ignored.
 whitelist = []
 
-# 'blacklist' an array of strings to exclude from the temporary list of servers during version comparison.
-# first the whitelist is added and then the blacklist is removed.
+# 'blacklist' is an array of strings to exclude from the temporary list of servers during version comparison.
+# first the whitelist is added and then all servers contained in the blacklist are removed from that temporary list.
 blacklist = []
 
 # If enabled this option ensures that joining players will be distributed evenly over all servers
@@ -17,7 +17,7 @@ blacklist = []
 distribution = "FIRST-MATCH"
 
 # If enabled this option ensures that whenever a client is kicked from a server (whether during login, via /kick, or for another reason),
-# they will be automatically redirected (bounced) to another server instead of being disconnected.
+# they will be automatically redirected (bounced) to another server instead of being disconnected. (obviously if a client disconnects explicitly via leaving the server they will not be redirected)
 enable-fallback-bouncing = true
 # If set to true, the server the client was kicked from will be temporarily excluded from fallback options,
 # preventing the client from being sent back there during fallback-bouncing.
@@ -25,6 +25,9 @@ exclude-previous-server = false
 # When there is a valid server name in 'explicit-fallback-server' the plugin won't search for a new server and instead only tries the specified server.
 # Leave this empty, if you'd like to disable this option (also this is disabled when enable-fallback-bouncing is set to false).
 explicit-fallback-server = ""
+
+
+###### the following options are not yet (fully) implemented
 
 # This option will determine how the plugin handles servers which can't be found
 # Options: (case-insensitive)

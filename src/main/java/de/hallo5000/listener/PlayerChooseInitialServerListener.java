@@ -3,6 +3,7 @@ package de.hallo5000.listener;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import de.hallo5000.main.Utils;
 import de.hallo5000.main.VelocityVersionBouncer;
 import net.kyori.adventure.text.Component;
 
@@ -14,38 +15,16 @@ public class PlayerChooseInitialServerListener {
 
     @Subscribe
     private void onPlayerChooseInitialServer(PlayerChooseInitialServerEvent e){
-        //only for testing!!
-        if(e.getPlayer().getProtocolVersion().getProtocol() == 767){
-            e.setInitialServer(VelocityVersionBouncer.getServer.getServer("Stoneblock-4").get());
-            return;
-        }
-
-
         //Toml Vars
         String distribution = Optional.ofNullable(toml.getString("distribution")).orElse("FIRST-MATCH");
-
-        //take all backend servers or only the ones provided by the whitelist (if one exists) and remove the ones on the blacklist
-        List<RegisteredServer> serverList = new ArrayList<>(Optional.ofNullable(toml.getList("whitelist", (new ArrayList<>(VelocityVersionBouncer.getServer.getAllServers())).stream().map(s -> s.getServerInfo().getName()).toList()))
-                .orElse((new ArrayList<>(VelocityVersionBouncer.getServer.getAllServers())).stream().map(s -> s.getServerInfo().getName()).toList())
-                .stream().map(name -> VelocityVersionBouncer.getServer.getServer(name).orElseGet(() -> {
-                    VelocityVersionBouncer.getLogger.info("'" + name + "' could not be found!");
-                    return null;
-                })).filter(Objects::nonNull).toList());
-
-        List<RegisteredServer> blacklist = Optional.ofNullable(toml.getList("blacklist", Collections.emptyList()))
-                .orElse(Collections.emptyList())
-                .stream().map(name -> VelocityVersionBouncer.getServer.getServer((String) name).orElseGet(() -> {
-                    VelocityVersionBouncer.getLogger.info("'"+ name + "' could not be found!");
-                    return null;
-                })).filter(Objects::nonNull).toList();
-        serverList.removeAll(blacklist);
 
         //start checking
         VelocityVersionBouncer.getLogger.info("Start checking for compatibilities (Clientprotocol: " + e.getPlayer().getProtocolVersion().getProtocol() + ")");
         List<RegisteredServer> matches = new ArrayList<>(); //every server with matching protocol version
-
-        for(RegisteredServer s : serverList){
-            if(e.getPlayer().getProtocolVersion().getProtocol() == VelocityVersionBouncer.ps.getPingCache().get(s).getProtocol()){
+        VelocityVersionBouncer.getLogger.info(Utils.getConfigServerList().toString());
+        for(RegisteredServer s : Utils.getConfigServerList()){
+            VelocityVersionBouncer.getLogger.info("Check " + s.getServerInfo().getName() + " with protocol " + VelocityVersionBouncer.ps.getProtocol(s));
+            if(e.getPlayer().getProtocolVersion().getProtocol() == VelocityVersionBouncer.ps.getProtocol(s).orElse(-1)){
                 matches.add(s);
             }
         }

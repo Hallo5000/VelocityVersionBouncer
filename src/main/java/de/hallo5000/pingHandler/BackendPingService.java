@@ -1,6 +1,8 @@
 package de.hallo5000.pingHandler;
 
+import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.server.ServerRegisteredEvent;
+import com.velocitypowered.api.event.proxy.server.ServerUnregisteredEvent;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import de.hallo5000.main.VelocityVersionBouncer;
@@ -8,6 +10,7 @@ import org.slf4j.Logger;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -26,10 +29,9 @@ public class BackendPingService {
     }
 
     public void start(){
-        pingAll();
         server.getScheduler()
                 .buildTask(plugin, this::pingAll)
-                .delay(30, TimeUnit.SECONDS)
+                .repeat(30, TimeUnit.SECONDS)
                 .schedule();
         server.getEventManager().register(plugin, this);
     }
@@ -45,17 +47,19 @@ public class BackendPingService {
     public void ping(RegisteredServer s){
         s.ping().whenComplete((result, error) -> {
             if (error != null) {
-                logger.warn(
-                        "Ping FAILED for " + s.getServerInfo().getName(),
-                        error
-                );
+                if(error instanceof java.net.ConnectException
+                        || error instanceof java.net.NoRouteToHostException
+                        || error instanceof java.net.SocketTimeoutException) logger.warn("Ping FAILED for " + s.getServerInfo().getName() + "\nbecause server is offline!");
+                if(error instanceof io.netty.handler.codec.CorruptedFrameException
+                        || error instanceof io.netty.handler.codec.DecoderException) logger.warn("Ping FAILED for " + s.getServerInfo().getName() + "\nbecause Ping Response is corrupted");
             }else{
                 pingCache.put(s, new BackendPingResult(result));
-                logger.info(result.toString());
+                logger.info(s.getServerInfo().getName() + ": " + result.toString());
             }
         });
     }
 
+    @Subscribe
     public void onServerRegistered(ServerRegisteredEvent e){
         e.registeredServer().ping().whenComplete((ping, error) -> {
             if(error != null) return; //possible error handling on ping fail
@@ -65,6 +69,17 @@ public class BackendPingService {
 
     public Map<RegisteredServer, BackendPingResult> getPingCache(){
         return Collections.unmodifiableMap(this.pingCache);
+    }
+
+    public OptionalInt getProtocol(RegisteredServer server){
+        BackendPingResult result = pingCache.get(server);
+        if(result == null) return OptionalInt.empty();
+        return OptionalInt.of(result.getProtocol());
+    }
+
+    @Subscribe
+    public void onServerUnregistered(ServerUnregisteredEvent e){
+        pingCache.remove(e.unregisteredServer());
     }
 
 }
