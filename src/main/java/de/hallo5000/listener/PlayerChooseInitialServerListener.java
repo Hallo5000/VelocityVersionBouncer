@@ -3,50 +3,63 @@ package de.hallo5000.listener;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import de.hallo5000.main.Main;
+import de.hallo5000.main.VelocityVersionBouncer;
 import net.kyori.adventure.text.Component;
 
 import java.util.*;
 
-import static de.hallo5000.main.Main.toml;
+import static de.hallo5000.main.VelocityVersionBouncer.toml;
 
 public class PlayerChooseInitialServerListener {
 
     @Subscribe
-    public void onPlayerChooseInitialServer(PlayerChooseInitialServerEvent e){
-        /* for testing!!
+    private void onPlayerChooseInitialServer(PlayerChooseInitialServerEvent e){
+        //only for testing!!
         if(e.getPlayer().getProtocolVersion().getProtocol() == 767){
-            e.setInitialServer(Main.getServer.getServer("Stoneblock-4").get());
+            e.setInitialServer(VelocityVersionBouncer.getServer.getServer("Stoneblock-4").get());
             return;
-        }*/
-        List<RegisteredServer> matches = new ArrayList<>();
-        Main.getLogger.info("Start checking for compatibilities (Clientprotocol: " + e.getPlayer().getProtocolVersion().getProtocol() + ")");
-        List<RegisteredServer> serverList = new ArrayList<>(Main.getServer.getAllServers());
-        if(toml.getString("order-mode").equalsIgnoreCase("CUSTOM")) serverList = new ArrayList<>(toml.getList("server-list").stream().map(x -> Main.getServer.getServer((String) x).orElse(null)).toList());
-        if(serverList.remove(null)) Main.getLogger.info("One or more of the specified servers couldn't be found!");
+        }
+
+
+        //Toml Vars
+        String distribution = Optional.ofNullable(toml.getString("distribution")).orElse("FIRST-MATCH");
+
+        //take all backend servers or only the ones provided by the whitelist (if one exists) and remove the ones on the blacklist
+        List<RegisteredServer> serverList = new ArrayList<>(Optional.ofNullable(toml.getList("whitelist", (new ArrayList<>(VelocityVersionBouncer.getServer.getAllServers())).stream().map(s -> s.getServerInfo().getName()).toList()))
+                .orElse((new ArrayList<>(VelocityVersionBouncer.getServer.getAllServers())).stream().map(s -> s.getServerInfo().getName()).toList())
+                .stream().map(name -> VelocityVersionBouncer.getServer.getServer(name).orElseGet(() -> {
+                    VelocityVersionBouncer.getLogger.info("'" + name + "' could not be found!");
+                    return null;
+                })).filter(Objects::nonNull).toList());
+
+        List<RegisteredServer> blacklist = Optional.ofNullable(toml.getList("blacklist", Collections.emptyList()))
+                .orElse(Collections.emptyList())
+                .stream().map(name -> VelocityVersionBouncer.getServer.getServer((String) name).orElseGet(() -> {
+                    VelocityVersionBouncer.getLogger.info("'"+ name + "' could not be found!");
+                    return null;
+                })).filter(Objects::nonNull).toList();
+        serverList.removeAll(blacklist);
+
+        //start checking
+        VelocityVersionBouncer.getLogger.info("Start checking for compatibilities (Clientprotocol: " + e.getPlayer().getProtocolVersion().getProtocol() + ")");
+        List<RegisteredServer> matches = new ArrayList<>(); //every server with matching protocol version
+
         for(RegisteredServer s : serverList){
-            if(!toml.getList("exclude-servers", Collections.emptyList()).contains(s.getServerInfo().getName())) {
-                if(e.getPlayer().getProtocolVersion().getProtocol() == Main.pingMap.get(s).getVersion().getProtocol()) {
-                    Main.getLogger.info("> " + s.getServerInfo().getName() + " is compatible with Protocol: " + Main.pingMap.get(s).getVersion().getProtocol());
-                    matches.add(s);
-                }else
-                    Main.getLogger.info("> " + s.getServerInfo().getName() + " is NOT compatible with Protocol: " + Main.pingMap.get(s).getVersion().getProtocol());
-            }else {
-                Main.getLogger.info("> " + s.getServerInfo().getName() + " is EXCLUDED from checking");
+            if(e.getPlayer().getProtocolVersion().getProtocol() == VelocityVersionBouncer.ps.getPingCache().get(s).getProtocol()){
+                matches.add(s);
             }
         }
-        Main.getLogger.info("JA SAFE");
         if(matches.isEmpty()){
             e.getPlayer().disconnect(Component.text("Disconnected: There is no server with a matching game version available!"));
-            Main.getLogger.info("No server found for this client");
-        }else{
+            VelocityVersionBouncer.getLogger.info("No server found for this client");
+        }else{ //needs to be changed if more than two distribution modes exist
             RegisteredServer finalServer = matches.getFirst();
-            if(toml.getString("distribution").equalsIgnoreCase("BALANCED")){
+            if(distribution.equalsIgnoreCase("BALANCED")){
                 for(RegisteredServer s : matches){
                     if(s.getPlayersConnected().size() < finalServer.getPlayersConnected().size()) finalServer = s;
                 }
             }
-            Main.getLogger.info("Connects to: " + finalServer.getServerInfo().getName());
+            VelocityVersionBouncer.getLogger.info("Connects to: " + finalServer.getServerInfo().getName());
             e.setInitialServer(finalServer);
         }
     }

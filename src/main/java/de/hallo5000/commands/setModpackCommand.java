@@ -3,7 +3,7 @@ package de.hallo5000.commands;
 import com.moandjiezana.toml.Toml;
 import com.moandjiezana.toml.TomlWriter;
 import com.velocitypowered.api.command.SimpleCommand;
-import de.hallo5000.main.Main;
+import de.hallo5000.main.VelocityVersionBouncer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 
@@ -16,11 +16,11 @@ public class setModpackCommand implements SimpleCommand {
     public void execute(final Invocation invocation) {
         if(invocation.arguments().length==1){
             String selected = null;
-            for(String s : Main.getServer.getAllServers().stream().map(x->x.getServerInfo().getName()).toList()){
+            for(String s : VelocityVersionBouncer.getServer.getAllServers().stream().map(x->x.getServerInfo().getName()).toList()){
                 if(invocation.arguments()[0].equals(s)) selected = s;
             }
             if(selected != null){
-                File modFolder = Main.getDataDirectory.resolve(selected).toFile();
+                File modFolder = VelocityVersionBouncer.getDataDirectory.resolve(selected).toFile();
                 if(modFolder.exists() && modFolder.isDirectory()){ // modFolder exists and should contain the modpack
                     if(modFolder.listFiles() == null) {
                         invocation.source().sendMessage(Component.text("There are no mods in this mod folder!", TextColor.fromHexString("FF5555")));
@@ -38,10 +38,10 @@ public class setModpackCommand implements SimpleCommand {
                             // | Old (Forge <1.13) | `mcmod.info`       optional   | JSON      |  (deprecated)     |
 
                             Toml modConfigs = null;
-                            try(InputStream forgeModern = Main.readFromJar(jar, "mods.toml");
-                                InputStream fabric = Main.readFromJar(jar, "fabric.mod.json");
-                                InputStream quilt = Main.readFromJar(jar, "quilt.mod.json");
-                                InputStream forgeDeprecated = Main.readFromJar(jar, "mcmod.info")){
+                            try(InputStream forgeModern = VelocityVersionBouncer.readFromJar(jar, "mods.toml");
+                                InputStream fabric = VelocityVersionBouncer.readFromJar(jar, "fabric.mod.json");
+                                InputStream quilt = VelocityVersionBouncer.readFromJar(jar, "quilt.mod.json");
+                                InputStream forgeDeprecated = VelocityVersionBouncer.readFromJar(jar, "mcmod.info")){
                                     if(forgeModern != null){
                                         modConfigs = new Toml().read(forgeModern);
                                         modList.addAll(modConfigs.getTables("mods"));
@@ -65,11 +65,11 @@ public class setModpackCommand implements SimpleCommand {
                     }
                     //Only Forge
                     TomlWriter tomlWriter = new TomlWriter.Builder().build();
-                    Map<String, Object> map = new HashMap<>(Main.modlistToml.toMap());
+                    Map<String, Object> map = new HashMap<>(VelocityVersionBouncer.modlistToml.toMap());
                     String[] modIDs = modList.stream().map(x -> x.getString("modId")).toArray(String[]::new);
                     map.put("modIDs-"+selected, modIDs);
                     try {
-                        tomlWriter.write(map, Main.modlistFile);
+                        tomlWriter.write(map, VelocityVersionBouncer.modlistFile);
                     } catch (IOException e) {
                         invocation.source().sendMessage(Component.text("Failed to write the Modlist to modlists.toml!", TextColor.fromHexString("FF5555")));
                         throw new RuntimeException(e);
@@ -83,11 +83,11 @@ public class setModpackCommand implements SimpleCommand {
 
     @Override
     public boolean hasPermission(final Invocation invocation) {
-        return invocation.source().equals(Main.getServer.getConsoleCommandSource());
+        return invocation.source().equals(VelocityVersionBouncer.getServer.getConsoleCommandSource());
     }
 
     @Override
     public CompletableFuture<List<String>> suggestAsync(final Invocation invocation) {
-        return CompletableFuture.completedFuture(Main.getServer.getAllServers().stream().map(x -> x.getServerInfo().getName()).toList());
+        return CompletableFuture.completedFuture(VelocityVersionBouncer.getServer.getAllServers().stream().map(x -> x.getServerInfo().getName()).toList());
     }
 }

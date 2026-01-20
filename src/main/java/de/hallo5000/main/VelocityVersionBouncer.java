@@ -7,17 +7,15 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.proxy.server.ServerPing;
 import de.hallo5000.listener.KickedFromServerListener;
 import de.hallo5000.listener.PlayerChooseInitialServerListener;
+import de.hallo5000.pingHandler.BackendPingService;
 import org.slf4j.Logger;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -43,7 +41,7 @@ ERROR crashed server order so
         url = "https://github.com/Hallo5000/VelocityVersionBouncer",
         description = "This plugin redirects players to server depending on there game version",
         authors = {"Hallo5000"})
-public class Main {
+public class VelocityVersionBouncer {
 
     private final ProxyServer server;
     private final Logger logger;
@@ -55,10 +53,10 @@ public class Main {
     public static Toml modlistToml;
     public static File modlistFile;
     public static Path getDataDirectory;
-    public static HashMap<RegisteredServer, ServerPing> pingMap;
+    public static BackendPingService ps;
 
     @Inject
-    public Main(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
+    public VelocityVersionBouncer(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
         this.server = server;
         this.logger = logger;
         this.dataDirectory = dataDirectory;
@@ -67,21 +65,6 @@ public class Main {
         getLogger = logger;
         getDataDirectory = dataDirectory;
 
-        for(RegisteredServer s : server.getAllServers()){
-            Main.getLogger.info("TEST");
-            s.ping().whenComplete((result, error) -> {
-                if (error != null) {
-                    Main.getLogger.warn(
-                            "Ping FAILED for " + s.getServerInfo().getName(),
-                            error
-                    );
-                }else{
-                    Main.pingMap.put(s, result);
-                    Main.getLogger.info("TEST2");
-                    Main.getLogger.info(result.toString());
-                }
-            });
-        }
 
         logger.info("Successfully loaded!");
     }
@@ -91,7 +74,9 @@ public class Main {
         toml = loadConfig();
         modlistToml = loadModlists();
         modlistFile = loadModlistsFile();
-        pingMap = new HashMap<RegisteredServer, ServerPing>();
+
+        ps = new BackendPingService(logger, this, server);
+        ps.start();
 
         /*
         CommandManager commandManager = server.getCommandManager();
