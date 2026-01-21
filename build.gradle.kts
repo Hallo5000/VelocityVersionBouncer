@@ -18,9 +18,6 @@ repositories {
 }
 
 dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     compileOnly("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
     annotationProcessor("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
     implementation("com.moandjiezana.toml:toml4j:0.7.1")
@@ -29,14 +26,15 @@ dependencies {
     implementation("io.netty:netty-transport:4.1.99.Final")
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
-
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
+tasks.register("printVersion") {
+    doLast {
+        println(project.version)
+    }
+}
 
 // Helper methods
 fun executeGitCommand(vararg command: String): String {

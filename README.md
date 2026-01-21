@@ -53,7 +53,7 @@ exclude-previous-server = false
 # Leave this empty, if you'd like to disable this option (also this is disabled when enable-fallback-bouncing is set to false).
 explicit-fallback-server = "lobby"
 
-# ------ for now only the 'p' prefix (protocol) is supported ------
+# ------ for now only the 'p' (and partially the 'v') prefixes are supported ------
 # Syntax
 #   vX.X.X - game version
 #   p000 - protocol version (Protocol Versions for every release/snapshot can be found here: https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Protocol_version_numbers)
