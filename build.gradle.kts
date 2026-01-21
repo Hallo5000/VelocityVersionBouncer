@@ -3,11 +3,11 @@ import java.io.ByteArrayOutputStream
 
 plugins {
     id("java")
-    id("io.papermc.hangar-publish-plugin") version "0.1.2"
+    id("io.papermc.hangar-publish-plugin") version "0.1.4"
 }
 
 group = "de.hallo5000"
-version = "1.2.0-release"
+version = "1.2.1-SNAPSHOT"
 
 repositories {
     mavenCentral()

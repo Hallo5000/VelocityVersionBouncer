@@ -23,7 +23,7 @@ import java.util.jar.JarFile;
 /*
 TODO:
 - Modrinth
-- explicit mapping ('c'/'v' prefixes not yet implemented)
+- explicit mapping ('c'/client brand prefix not yet implemented and need to find out the syntax for version prefix)
 - hangar update resource page
 - modlists/forge/fabric (idea: at least check the client for the right modloader so some servers are forge-only for example)
 - ViaVersion detect
@@ -35,7 +35,7 @@ TODO:
 
 
 
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.2.0-release",
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.2.1-SNAPSHOT",
         url = "https://github.com/Hallo5000/VelocityVersionBouncer",
         description = "This plugin redirects players to server depending on there game version",
         authors = {"Hallo5000"})

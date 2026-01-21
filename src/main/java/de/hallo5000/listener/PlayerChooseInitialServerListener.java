@@ -15,6 +15,7 @@ public class PlayerChooseInitialServerListener {
 
     @Subscribe
     private void onPlayerChooseInitialServer(PlayerChooseInitialServerEvent e){
+        //check for explicit routings (protocol prefix)
         if(toml.getTable("explicit-routing").toMap().containsKey("p"+e.getPlayer().getProtocolVersion().getProtocol())){
             String serverName = (String) toml.getTable("explicit-routing").toMap().get("p"+e.getPlayer().getProtocolVersion().getProtocol());
             RegisteredServer match = VelocityVersionBouncer.getServer.getServer(serverName).orElse(null);
@@ -22,6 +23,18 @@ public class PlayerChooseInitialServerListener {
                 VelocityVersionBouncer.getLogger.info("Connects to explicitly declared server: " + match.getServerInfo().getName());
                 e.setInitialServer(match);
                 return;
+            }
+        }
+        //check for explicit routings (version prefix)
+        for(String v : e.getPlayer().getProtocolVersion().getVersionsSupportedBy()){
+            if(toml.getTable("explicit-routing").toMap().containsKey("v"+v)){
+                String serverName = (String) toml.getTable("explicit-routing").toMap().get("v"+v);
+                RegisteredServer match = VelocityVersionBouncer.getServer.getServer(serverName).orElse(null);
+                if(match != null){
+                    VelocityVersionBouncer.getLogger.info("Connects to explicitly declared server: " + match.getServerInfo().getName());
+                    e.setInitialServer(match);
+                    return;
+                }
             }
         }
 

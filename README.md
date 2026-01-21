@@ -1,5 +1,6 @@
 # VelocityVersionBouncer
-### A simple and fully automated way to connect players to the correct server based on their game version.
+**A simple and fully automated way to connect players to the correct server based on their game version.**
+
 **VelocityVersionBouncer** is a plugin for the [Velocity proxy](https://papermc.io/software/velocity) (tested on version 3.4) that automatically selects the most compatible backend server for a connecting player, based on their protocol version (Minecraft game version).
 
 ---
