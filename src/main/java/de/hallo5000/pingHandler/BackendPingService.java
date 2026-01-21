@@ -8,9 +8,11 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import de.hallo5000.main.VelocityVersionBouncer;
 import org.slf4j.Logger;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -31,45 +33,56 @@ public class BackendPingService {
     public void start(){
         server.getScheduler()
                 .buildTask(plugin, this::pingAll)
-                .repeat(30, TimeUnit.SECONDS)
+                .repeat(60, TimeUnit.SECONDS)
                 .schedule();
         server.getEventManager().register(plugin, this);
     }
 
     public void pingAll(){
         logger.info("Pinging every Backend Server...");
+        List<CompletableFuture<?>> futures = new ArrayList<>();
         for(RegisteredServer s : server.getAllServers()){
-            ping(s);
+            futures.add(ping(s));
         }
-        logger.info("Pings complete!");
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).whenComplete((v, e) -> logger.info("Pings complete!"));
     }
 
-    public void ping(RegisteredServer s){
-        s.ping().whenComplete((result, error) -> {
+    public CompletableFuture<?> ping(RegisteredServer s){
+        return s.ping().whenComplete((result, error) -> {
             if (error != null) {
                 if(error instanceof java.net.ConnectException
                         || error instanceof java.net.NoRouteToHostException
-                        || error instanceof java.net.SocketTimeoutException) logger.warn("Ping FAILED for " + s.getServerInfo().getName() + "\nbecause server is offline!");
-                if(error instanceof io.netty.handler.codec.CorruptedFrameException
-                        || error instanceof io.netty.handler.codec.DecoderException) logger.warn("Ping FAILED for " + s.getServerInfo().getName() + "\nbecause Ping Response is corrupted");
+                        || error instanceof java.net.SocketTimeoutException) logger.info("Ping FAILED for " + s.getServerInfo().getName() + " (server is offline)");
+                if(error instanceof io.netty.handler.codec.CorruptedFrameException //may be irrelevant because the CorruptedFrameException is handled by the Decoder Exception
+                        || error instanceof io.netty.handler.codec.DecoderException) logger.info("Ping FAILED for " + s.getServerInfo().getName() + " (ping response is corrupted)");
             }else{
                 pingCache.put(s, new BackendPingResult(result));
-                logger.info(s.getServerInfo().getName() + ": " + result.toString());
+                logger.info("Ping SUCCESSFUL for " + s.getServerInfo().getName() + " - protocol version: " + pingCache.get(s).getProtocol());
             }
         });
     }
 
     @Subscribe
     public void onServerRegistered(ServerRegisteredEvent e){
-        e.registeredServer().ping().whenComplete((ping, error) -> {
-            if(error != null) return; //possible error handling on ping fail
-            pingCache.put(e.registeredServer(), new BackendPingResult(ping));
+        logger.info("New server registered. Pinging...");
+        e.registeredServer().ping().whenComplete((result, error) -> {
+            if (error != null) {
+                if(error instanceof java.net.ConnectException
+                        || error instanceof java.net.NoRouteToHostException
+                        || error instanceof java.net.SocketTimeoutException) logger.warn("Ping FAILED for " + e.registeredServer().getServerInfo().getName() + " (server is offline)");
+                if(error instanceof io.netty.handler.codec.CorruptedFrameException //may be irrelevant because the CorruptedFrameException is handled by the Decoder Exception
+                        || error instanceof io.netty.handler.codec.DecoderException) logger.warn("Ping FAILED for " + e.registeredServer().getServerInfo().getName() + " (ping response is corrupted)");
+            }else{
+                pingCache.put(e.registeredServer(), new BackendPingResult(result));
+                logger.info(e.registeredServer().getServerInfo().getName() + ": " + result.toString());
+            }
         });
     }
 
+    /* not safe as this exposes nearly the entire backend
     public Map<RegisteredServer, BackendPingResult> getPingCache(){
         return Collections.unmodifiableMap(this.pingCache);
-    }
+    }*/
 
     public OptionalInt getProtocol(RegisteredServer server){
         BackendPingResult result = pingCache.get(server);

@@ -17,14 +17,15 @@ public class KickedFromServerListener {
     public void onPlayerKick(KickedFromServerEvent e){
         if(toml.getBoolean("enable-fallback-bouncing")){
             if(toml.getString("explicit-fallback-server").equalsIgnoreCase("")){ //there is no explicit fallback server
-                /* no explicit routing yet
-                List<String> matchingKeys = toml.getTable("explicit-routing").toMap().keySet().stream().filter(x -> x.startsWith("p"+e.getPlayer().getProtocolVersion().getProtocol())).toList();
-                if(!matchingKeys.isEmpty()){
-                    String matchName = (String) toml.getTable("explicit-routing").toMap().get("p"+e.getPlayer().getProtocolVersion().getProtocol()+"c"+e.getPlayer().getClientBrand());
-                    if(matchName == null) matchName = (String) toml.getTable("explicit-routing").toMap().get("p"+e.getPlayer().getProtocolVersion().getProtocol());
-                    RegisteredServer match = VelocityVersionBouncer.getServer.getServer(matchName).orElse(null);
-                    //if()
-                }*/
+                if(toml.getTable("explicit-routing").toMap().containsKey("p"+e.getPlayer().getProtocolVersion().getProtocol())){
+                    String serverName = (String) toml.getTable("explicit-routing").toMap().get("p"+e.getPlayer().getProtocolVersion().getProtocol());
+                    RegisteredServer match = VelocityVersionBouncer.getServer.getServer(serverName).orElse(null);
+                    if(match != null){
+                        VelocityVersionBouncer.getLogger.info("Connects to explicitly declared server: " + match.getServerInfo().getName());
+                        e.setResult(KickedFromServerEvent.RedirectPlayer.create(match));
+                        return;
+                    }
+                }
                 List<RegisteredServer> matches = new ArrayList<>();
                 VelocityVersionBouncer.getLogger.info("[FALLBACK] Start checking for compatibilities (Clientprotocol: " + e.getPlayer().getProtocolVersion().getProtocol() + ")");
                 List<RegisteredServer> serverList = Utils.getConfigServerList();
@@ -33,9 +34,9 @@ public class KickedFromServerListener {
                 for(RegisteredServer s : serverList){
                     if (e.getPlayer().getProtocolVersion().getProtocol() == VelocityVersionBouncer.ps.getProtocol(s).orElse(-1)) {
                         matches.add(s);
-                        VelocityVersionBouncer.getLogger.info("> " + s.getServerInfo().getName() + " is compatible with Protocol: " + VelocityVersionBouncer.ps.getPingCache().get(s).getProtocol());
+                        VelocityVersionBouncer.getLogger.info("> " + s.getServerInfo().getName() + " is compatible with Protocol: " + VelocityVersionBouncer.ps.getProtocol(s));
                     } else
-                        VelocityVersionBouncer.getLogger.info("> " + s.getServerInfo().getName() + " is NOT compatible with Protocol: " + VelocityVersionBouncer.ps.getPingCache().get(s).getProtocol());
+                        VelocityVersionBouncer.getLogger.info("> " + s.getServerInfo().getName() + " is NOT compatible with Protocol: " + VelocityVersionBouncer.ps.getProtocol(s));
                 }
                 if(matches.isEmpty()){
                     if(e.getServerKickReason().isPresent()) e.setResult(KickedFromServerEvent.DisconnectPlayer.create(e.getServerKickReason().get().append(Component.text("\nand there is no fallback server with a matching game version available."))));

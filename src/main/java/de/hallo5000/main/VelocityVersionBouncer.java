@@ -23,20 +23,19 @@ import java.util.jar.JarFile;
 /*
 TODO:
 - Modrinth
-- explicit mapping
+- explicit mapping ('c'/'v' prefixes not yet implemented)
 - hangar update resource page
 - modlists/forge/fabric (idea: at least check the client for the right modloader so some servers are forge-only for example)
 - ViaVersion detect
 - language files
 - exclude reconnect on /kick (impossible when only acting on the proxy side)
 - config-version in config
-
-ERROR crashed server order so
- */
-
+- lookup which netty version to use (especially for implementing the custom ping)
+*/
 
 
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.1.1-SNAPSHOT",
+
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.2.0-release",
         url = "https://github.com/Hallo5000/VelocityVersionBouncer",
         description = "This plugin redirects players to server depending on there game version",
         authors = {"Hallo5000"})

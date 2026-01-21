@@ -1,9 +1,9 @@
-# This config is used to determine how and if servers are checked for their protocol versions whenevery a client logs in (and optionally if they lost connection)
+# This config is used to determine how and if servers are checked for their protocol versions whenever a client tries to connect to a backend server (and optionally if they lost connection)
 
 # 'whitelist' is a string array of server names to check for their protocol version when a client tries to connect.
 # leaving this empty is equal to putting all registered servers in
 # Example: ["server1", "server2"]
-# Note: Spaces outside the strings will be ignored.
+# Note: spaces outside the strings will be ignored.
 whitelist = []
 
 # 'blacklist' is an array of strings to exclude from the temporary list of servers during version comparison.
@@ -13,7 +13,7 @@ blacklist = []
 # If enabled this option ensures that joining players will be distributed evenly over all servers
 # Options: (case-insensitive)
 #   "FIRST-MATCH" - players will be sent to the first matching server
-#   "BALANCED" - players will be evenly distributed on all matches in the order deriving from 'order-mode'
+#   "BALANCED" - players will be evenly distributed over all matching servers
 distribution = "FIRST-MATCH"
 
 # If enabled this option ensures that whenever a client is kicked from a server (whether during login, via /kick, or for another reason),
@@ -26,20 +26,11 @@ exclude-previous-server = false
 # Leave this empty, if you'd like to disable this option (also this is disabled when enable-fallback-bouncing is set to false).
 explicit-fallback-server = ""
 
-
-###### the following options are not yet (fully) implemented
-
-# This option will determine how the plugin handles servers which can't be found
-# Options: (case-insensitive)
-#   "NEXT-LEVEL" - if the last attempt used 'explicit-routing' and was clientbrand-specific the next one will be the next more-general, else it will be the same as "LIST"
-#   "LIST" - if the last attempt used 'explicit-routing' the server-list will be used, else it will just go to the next server in the server-list
-#   "DISCONNECT" - after the first routing failure the client will be kicked
-routing-failure = ""
-
+# ------ for now only the 'p' prefix (protocol) is supported ------
 # Syntax
 #   vX.X.X - game version
 #   p000 - protocol version (Protocol Versions for every release/snapshot can be found here: https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Protocol_version_numbers)
-#   cFORGE - Client brand (for example: vanilla, forge, fabric, geyser (for player joining through GeyserMC), badlion, lunarasdfasdfasdfasdf
+#   cFORGE - Client brand (for example: vanilla, forge, fabric, geyser (for player joining through GeyserMC), badlion, lunar, etc.
 # either a game version (v) or a protocol version (p) is necessary but client brands (c) are completely optional
 # when no client brand is defined the routing just takes every client joining with the defined game/protocol version
 [explicit-routing]

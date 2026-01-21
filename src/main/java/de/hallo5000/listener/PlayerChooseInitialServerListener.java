@@ -15,6 +15,16 @@ public class PlayerChooseInitialServerListener {
 
     @Subscribe
     private void onPlayerChooseInitialServer(PlayerChooseInitialServerEvent e){
+        if(toml.getTable("explicit-routing").toMap().containsKey("p"+e.getPlayer().getProtocolVersion().getProtocol())){
+            String serverName = (String) toml.getTable("explicit-routing").toMap().get("p"+e.getPlayer().getProtocolVersion().getProtocol());
+            RegisteredServer match = VelocityVersionBouncer.getServer.getServer(serverName).orElse(null);
+            if(match != null){
+                VelocityVersionBouncer.getLogger.info("Connects to explicitly declared server: " + match.getServerInfo().getName());
+                e.setInitialServer(match);
+                return;
+            }
+        }
+
         //Toml Vars
         String distribution = Optional.ofNullable(toml.getString("distribution")).orElse("FIRST-MATCH");
 
