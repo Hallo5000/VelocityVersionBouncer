@@ -65,7 +65,7 @@ jobs:
             }')
 
           # Upload to Modrinth
-          curl -X POST https://api.modrinth.com/v2/project/X5ETMik1/version \
+          curl -X POST https://api.modrinth.com/v2/version \
             -H "Authorization: $MODRINTH_TOKEN" \
             -H "Content-Type: multipart/form-data" \
             -F "data=$JSON_PAYLOAD;type=application/json" \

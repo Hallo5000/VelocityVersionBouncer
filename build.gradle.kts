@@ -21,9 +21,9 @@ dependencies {
     compileOnly("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
     annotationProcessor("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
     implementation("com.moandjiezana.toml:toml4j:0.7.1")
-    implementation("io.netty:netty-buffer:4.1.99.Final")
-    implementation("io.netty:netty-codec:4.1.99.Final")
-    implementation("io.netty:netty-transport:4.1.99.Final")
+    implementation("io.netty:netty-buffer:4.2.7.Final")
+    implementation("io.netty:netty-codec:4.2.7.Final")
+    implementation("io.netty:netty-transport:4.2.7.Final")
 }
 
 java {

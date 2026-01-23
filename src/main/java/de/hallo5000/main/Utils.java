@@ -1,7 +1,10 @@
 package de.hallo5000.main;
 
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -9,7 +12,11 @@ import static de.hallo5000.main.VelocityVersionBouncer.toml;
 
 public class Utils {
 
-    public static List<RegisteredServer> getConfigServerList(){
+    /**
+     * Gets the whitelist and blacklist from the plugins config.yml and computes the resulting 'serverlist'
+     * @return a list of <code>RegisteredServer</code>s, may be empty but not null
+     */
+    public static @NotNull List<RegisteredServer> getConfigServerList(){
         //take all backend servers or only the ones provided by the whitelist (if one exists) and remove the ones on the blacklist
         List<RegisteredServer> serverList = (new ArrayList<>(toml.getList("whitelist")))
                 .stream().map(name -> VelocityVersionBouncer.getServer.getServer((String) name).orElseGet(() -> {
@@ -27,4 +34,39 @@ public class Utils {
         return serverList;
     }
 
+    /**
+     * Gets all explicit routings from the plugins config.yml and searches for matching routings (may not be in order)
+     * @param player the client whose protocol to compare the explicit routings to
+     * @return the first found server or null if no server is found
+     * @throws NullPointerException when player is null
+     */
+    public static @Nullable RegisteredServer checkForExplicitRouting(Player player){
+        Map<String, Object> explicitRoutings = new TreeMap<>();
+        //takes all explicit routings applicable for this client (not checking for client brands yet)
+        for(String s : toml.getTable("explicit-routing").toMap().keySet()){
+            if(s.isEmpty() && !s.matches("^((p\\d{3})|(v\\d+.\\d+.\\d+))?(c[^\\d]+)?$")) continue; //only 3 digit version numbers (may change)
+            if(s.startsWith("p"+player.getProtocolVersion().getProtocol())
+                    || player.getProtocolVersion().getVersionsSupportedBy().stream().anyMatch(v -> s.startsWith("v"+v))
+            ) explicitRoutings.put(s, toml.getTable("explicit-routing").toMap().get(s));
+
+        }
+        //removes all explicit routings with unmatching client brands
+        for(String s : new HashSet<>(explicitRoutings.keySet())){
+            if(s.contains("c") && !s.endsWith("c"+player.getClientBrand())) explicitRoutings.remove(s);
+        }
+        //matching protocol version + optional client brand
+        if(explicitRoutings.keySet().stream().anyMatch(r -> r.startsWith("p"+player.getProtocolVersion().getProtocol()))) {
+            for(String s : new HashSet<>(explicitRoutings.keySet())){
+                if(!s.startsWith("p"+player.getProtocolVersion().getProtocol())) explicitRoutings.remove(s);
+                else if(s.endsWith("c"+player.getClientBrand())) return VelocityVersionBouncer.getServer.getServer((String) explicitRoutings.get(s)).orElse(null);
+            }
+            String serverName = (String) explicitRoutings.get("p" + player.getProtocolVersion().getProtocol());
+            return VelocityVersionBouncer.getServer.getServer(serverName).orElse(null);
+        }
+
+        //TODO: return game version matches
+        //TODO: wildcard pattern for clientbrands (lunarclient adds build number in name)
+
+        return null;
+    }
 }

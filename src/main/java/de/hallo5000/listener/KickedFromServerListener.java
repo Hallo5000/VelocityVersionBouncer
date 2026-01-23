@@ -17,17 +17,14 @@ public class KickedFromServerListener {
     public void onPlayerKick(KickedFromServerEvent e){
         if(toml.getBoolean("enable-fallback-bouncing")){
             if(toml.getString("explicit-fallback-server").equalsIgnoreCase("")){ //there is no explicit fallback server
-                if(toml.getTable("explicit-routing").toMap().containsKey("p"+e.getPlayer().getProtocolVersion().getProtocol())){
-                    String serverName = (String) toml.getTable("explicit-routing").toMap().get("p"+e.getPlayer().getProtocolVersion().getProtocol());
-                    RegisteredServer match = VelocityVersionBouncer.getServer.getServer(serverName).orElse(null);
-                    if(match != null){
-                        VelocityVersionBouncer.getLogger.info("Connects to explicitly declared server: " + match.getServerInfo().getName());
-                        e.setResult(KickedFromServerEvent.RedirectPlayer.create(match));
-                        return;
-                    }
+                VelocityVersionBouncer.getLogger.info("[FALLBACK] Start checking for compatibilities (Clientprotocol: " + e.getPlayer().getProtocolVersion().getProtocol() + ")");
+                RegisteredServer match = Utils.checkForExplicitRouting(e.getPlayer());
+                if (match != null && !(toml.getBoolean("exclude-previous-server") && match == e.getServer())) {
+                    VelocityVersionBouncer.getLogger.info("Connects to explicitly declared server: " + match.getServerInfo().getName());
+                    e.setResult(KickedFromServerEvent.RedirectPlayer.create(match));
+                    return;
                 }
                 List<RegisteredServer> matches = new ArrayList<>();
-                VelocityVersionBouncer.getLogger.info("[FALLBACK] Start checking for compatibilities (Clientprotocol: " + e.getPlayer().getProtocolVersion().getProtocol() + ")");
                 List<RegisteredServer> serverList = Utils.getConfigServerList();
                 if(serverList.remove(null)) VelocityVersionBouncer.getLogger.info("One or more of the specified servers couldn't be found!");
                 if(toml.getBoolean("exclude-previous-server")) serverList.remove(e.getServer());
