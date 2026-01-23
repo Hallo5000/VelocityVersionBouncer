@@ -15,22 +15,17 @@ import org.slf4j.Logger;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Enumeration;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 
 /*
 TODO:
 - Modrinth
-- explicit mapping ('c'/client brand prefix not yet implemented and need to find out the syntax for version prefix)
-- hangar update resource page
-- modlists/forge/fabric (idea: at least check the client for the right modloader so some servers are forge-only for example)
+- explicit mapping ('v'/version prefix not yet implemented and need to find out the syntax for version prefix)
+- override versions on HangarMC
+- modlists
 - ViaVersion detect
 - language files
-- exclude reconnect on /kick (impossible when only acting on the proxy side)
 - config-version in config
-- lookup which netty version to use (especially for implementing the custom ping)
 */
 
 
@@ -48,8 +43,6 @@ public class VelocityVersionBouncer {
     public static ProxyServer getServer;
     public static Logger getLogger;
     public static Toml toml;
-    public static Toml modlistToml;
-    public static File modlistFile;
     public static Path getDataDirectory;
     public static BackendPingService ps;
 
@@ -70,20 +63,9 @@ public class VelocityVersionBouncer {
     @Subscribe
     public void onInitialize(ProxyInitializeEvent e) {
         toml = loadConfig();
-        modlistToml = loadModlists();
-        modlistFile = loadModlistsFile();
 
         ps = new BackendPingService(logger, this, server);
         ps.start();
-
-        /*
-        CommandManager commandManager = server.getCommandManager();
-        CommandMeta commandMeta = commandManager.metaBuilder("setModpack")
-                .plugin(this)
-                .build();
-
-        commandManager.register(commandMeta, new setModpackCommand());
-        */
 
         server.getEventManager().register(this, new PlayerChooseInitialServerListener());
         server.getEventManager().register(this, new KickedFromServerListener());
@@ -105,52 +87,4 @@ public class VelocityVersionBouncer {
             return null;
         }
     }
-
-    private File loadModlistsFile() {
-        File dataFolder = dataDirectory.toFile();
-        try {
-            if(!dataFolder.exists()) {
-                dataFolder.mkdirs();
-            }
-            File file = new File(dataFolder, "modlists.toml");
-            if(!file.exists()) {
-                Files.copy(getClass().getClassLoader().getResourceAsStream("modlists.toml"), file.toPath());
-            }
-            return file;
-        } catch (IOException ex) {
-            logger.error("Could not load modlists.toml file - Please check for errors", ex);
-            return null;
-        }
-    }
-
-    private Toml loadModlists(){
-        return new Toml(new Toml().read(getClass().getClassLoader().getResourceAsStream("modlists.toml"))).read(loadModlistsFile());
-    }
-
-    public static InputStream readFromJar(File jarFile, String fileToRead) throws IOException {
-        JarFile jar =  new JarFile(jarFile);
-        Enumeration<JarEntry> entries = jar.entries();
-        while (entries.hasMoreElements()) {
-            JarEntry e = entries.nextElement();
-            if (e.getName().endsWith(fileToRead)) {
-                try {
-                    //following variant could be implemented via an overload
-                    /*File tempFile = File.createTempFile(jarFile.getName()+"-specificExtract-", ".tmp");
-                    tempFile.deleteOnExit();
-                    InputStream input = jar.getInputStream(e);
-                    try (OutputStream output = new FileOutputStream(tempFile)) {
-                        input.transferTo(output);
-                    } catch (IOException ioException) {
-                        ioException.printStackTrace();
-                    }
-                    return tempFile;*/
-                    return jar.getInputStream(e);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        }
-        return null;
-    }
-
 }

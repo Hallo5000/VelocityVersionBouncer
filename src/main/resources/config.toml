@@ -16,6 +16,10 @@ blacklist = []
 #   "BALANCED" - players will be evenly distributed over all matching servers
 distribution = "FIRST-MATCH"
 
+# This defines how often all backend servers get pinged to refresh infos in the plugins ping cache
+# in seconds
+ping-intervall = 60
+
 # If enabled this option ensures that whenever a client is kicked from a server (whether during login, via /kick, or for another reason),
 # they will be automatically redirected (bounced) to another server instead of being disconnected. (obviously if a client disconnects explicitly via leaving the server they will not be redirected)
 enable-fallback-bouncing = true

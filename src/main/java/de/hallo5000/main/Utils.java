@@ -42,13 +42,9 @@ public class Utils {
      */
     public static @Nullable RegisteredServer checkForExplicitRouting(Player player){
         Map<String, Object> explicitRoutings = new TreeMap<>();
-        //takes all explicit routings applicable for this client (not checking for client brands yet)
+        //takes all valid explicit routings
         for(String s : toml.getTable("explicit-routing").toMap().keySet()){
-            if(s.isEmpty() && !s.matches("^((p\\d{3})|(v\\d+.\\d+.\\d+))?(c[^\\d]+)?$")) continue; //only 3 digit version numbers (may change)
-            if(s.startsWith("p"+player.getProtocolVersion().getProtocol())
-                    || player.getProtocolVersion().getVersionsSupportedBy().stream().anyMatch(v -> s.startsWith("v"+v))
-            ) explicitRoutings.put(s, toml.getTable("explicit-routing").toMap().get(s));
-
+            if(!s.isEmpty() && s.matches("^((p\\d{3})|(v\\d+.\\d+.\\d+))?(c[^\\d]+)?$")) explicitRoutings.put(s, toml.getTable("explicit-routing").toMap().get(s));
         }
         //removes all explicit routings with unmatching client brands
         for(String s : new HashSet<>(explicitRoutings.keySet())){
@@ -56,17 +52,34 @@ public class Utils {
         }
         //matching protocol version + optional client brand
         if(explicitRoutings.keySet().stream().anyMatch(r -> r.startsWith("p"+player.getProtocolVersion().getProtocol()))) {
+            //at this point there is at least one match for the protocol version number
             for(String s : new HashSet<>(explicitRoutings.keySet())){
-                if(!s.startsWith("p"+player.getProtocolVersion().getProtocol())) explicitRoutings.remove(s);
-                else if(s.endsWith("c"+player.getClientBrand())) return VelocityVersionBouncer.getServer.getServer((String) explicitRoutings.get(s)).orElse(null);
+                if(s.startsWith("p")){
+                    if(!s.startsWith("p"+player.getProtocolVersion().getProtocol())) explicitRoutings.remove(s);
+                    else if(s.endsWith("c"+player.getClientBrand()))
+                        return VelocityVersionBouncer.getServer.getServer((String) explicitRoutings.get(s)).orElse(null);
+                }
             }
             String serverName = (String) explicitRoutings.get("p" + player.getProtocolVersion().getProtocol());
             return VelocityVersionBouncer.getServer.getServer(serverName).orElse(null);
         }
-
-        //TODO: return game version matches
-        //TODO: wildcard pattern for clientbrands (lunarclient adds build number in name)
-
+        //matching game versions + optional client brand
+        for(String v : player.getProtocolVersion().getVersionsSupportedBy()){
+            if(explicitRoutings.keySet().stream().anyMatch(r -> r.startsWith("v"+v))){
+                for(String s : new HashSet<>(explicitRoutings.keySet())){
+                    if(s.startsWith("v")){
+                        if(!s.startsWith("v"+v)) explicitRoutings.remove(s);
+                        else if(s.endsWith("c"+player.getClientBrand()))
+                            return VelocityVersionBouncer.getServer.getServer((String) explicitRoutings.get(s)).orElse(null);
+                    }
+                }
+                String serverName = (String) explicitRoutings.get("v"+v);
+                return VelocityVersionBouncer.getServer.getServer(serverName).orElse(null);
+            }
+        }
+        //match with only client brand
+        if(explicitRoutings.containsKey("c"+player.getClientBrand()))
+            return VelocityVersionBouncer.getServer.getServer((String) explicitRoutings.get("c"+player.getClientBrand())).orElse(null);
         return null;
     }
 }

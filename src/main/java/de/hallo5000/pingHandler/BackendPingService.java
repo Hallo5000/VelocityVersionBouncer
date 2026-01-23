@@ -16,6 +16,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import static de.hallo5000.main.VelocityVersionBouncer.toml;
+
 public class BackendPingService {
 
     private final Logger logger;
@@ -23,6 +25,12 @@ public class BackendPingService {
     private final ProxyServer server;
     private final Map<RegisteredServer, BackendPingResult> pingCache;
 
+    /**
+     * Initializes the internal Objects (the pingCache Map is initialized as <code>ConcurrentHashMap</code>
+     * @param logger an instance of the plugins logger
+     * @param plugin an instance of the plugins main class
+     * @param server the main instance of <code>ProxyServer</code>
+     */
     public BackendPingService(Logger logger, VelocityVersionBouncer plugin, ProxyServer server){
         this.logger = logger;
         this.plugin = plugin;
@@ -37,7 +45,7 @@ public class BackendPingService {
     public void start(){
         server.getScheduler()
                 .buildTask(plugin, this::pingAll)
-                .repeat(60, TimeUnit.SECONDS)
+                .repeat(toml.getLong("ping-intervall"), TimeUnit.SECONDS)
                 .schedule();
         server.getEventManager().register(plugin, this);
     }
@@ -75,12 +83,6 @@ public class BackendPingService {
         });
     }
 
-    @Subscribe
-    public void onServerRegistered(ServerRegisteredEvent e){
-        logger.info("New server registered. Pinging...");
-        ping(e.registeredServer());
-    }
-
     /**
      * Looks up the ping in the ping cache and returns the Protocol Version Number if present
      * @param server <code>RegisteredServer</code> to get the ping from
@@ -90,6 +92,12 @@ public class BackendPingService {
         BackendPingResult result = pingCache.get(server);
         if(result == null) return OptionalInt.empty();
         return OptionalInt.of(result.getProtocol());
+    }
+
+    @Subscribe
+    public void onServerRegistered(ServerRegisteredEvent e){
+        logger.info("New server registered. Pinging...");
+        ping(e.registeredServer());
     }
 
     @Subscribe
