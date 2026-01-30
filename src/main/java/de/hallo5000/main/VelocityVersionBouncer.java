@@ -24,13 +24,14 @@ TODO:
 - override versions on HangarMC
 - modlists
 - ViaVersion detect
-- language files
+- language files (+color code support)
 - config-version in config
+- rework main class
+- custom ping backend servers
 */
 
 
-
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.2.1-SNAPSHOT",
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.2.2-SNAPSHOT",
         url = "https://github.com/Hallo5000/VelocityVersionBouncer",
         description = "This plugin redirects players to server depending on there game version",
         authors = {"Hallo5000"})
@@ -43,7 +44,6 @@ public class VelocityVersionBouncer {
     public static ProxyServer getServer;
     public static Logger getLogger;
     public static Toml toml;
-    public static Path getDataDirectory;
     public static BackendPingService ps;
 
     @Inject
@@ -54,8 +54,6 @@ public class VelocityVersionBouncer {
 
         getServer = server;
         getLogger = logger;
-        getDataDirectory = dataDirectory;
-
 
         logger.info("Successfully loaded!");
     }
@@ -73,16 +71,12 @@ public class VelocityVersionBouncer {
 
     private Toml loadConfig() {
         File dataFolder = dataDirectory.toFile();
-        try {
-            if(!dataFolder.exists()) {
-                dataFolder.mkdirs();
-            }
-            File file = new File(dataFolder, "config.toml");
-            if(!file.exists()) {
-                Files.copy(getClass().getClassLoader().getResourceAsStream("config.toml"), file.toPath());
-            }
-            return new Toml(new Toml().read(getClass().getClassLoader().getResourceAsStream("config.toml"))).read(file);
-        } catch (IOException ex) {
+        if(!dataFolder.exists() && !dataFolder.mkdirs()) logger.error("Couldn't create plugins folder, probably caused by a missing permission.");
+        File file = new File(dataFolder, "config.toml");
+        try(InputStream defaultConfig = getClass().getClassLoader().getResourceAsStream("config.toml")){
+            if(!file.exists() && defaultConfig != null) Files.copy(defaultConfig, file.toPath());
+            return new Toml(new Toml().read(defaultConfig)).read(file);
+        }catch(IOException ex){
             logger.error("Could not load config.toml file - Please check for errors", ex);
             return null;
         }
