@@ -28,7 +28,6 @@ public class PlayerChooseInitialServerListener {
         //start checking
         VelocityVersionBouncer.getLogger.info("Start checking for compatibilities (Clientprotocol: " + e.getPlayer().getProtocolVersion().getProtocol() + ")");
         List<RegisteredServer> matches = new ArrayList<>(); //every server with matching protocol version
-        VelocityVersionBouncer.getLogger.info(Utils.getConfigServerList().toString());
         for(RegisteredServer s : Utils.getConfigServerList()){
             VelocityVersionBouncer.getLogger.info("Check " + s.getServerInfo().getName() + " with protocol " + VelocityVersionBouncer.ps.getProtocol(s));
             if(e.getPlayer().getProtocolVersion().getProtocol() == VelocityVersionBouncer.ps.getProtocol(s).orElse(-1)){

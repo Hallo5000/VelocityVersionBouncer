@@ -74,7 +74,7 @@ public class BackendPingService {
             pingCache.put(server, new BackendPingResult(Utils.getProtocolFromHandshake(result)));
             if(pingCache.get(server).getProtocol() != -1){
                 logger.info("Ping SUCCESSFUL for " + server.getServerInfo().getName() + " - protocol version number: " + pingCache.get(server).getProtocol());
-            }
+            }else logger.info("Ping FAILED for " + server.getServerInfo().getName());
         });
     }
 

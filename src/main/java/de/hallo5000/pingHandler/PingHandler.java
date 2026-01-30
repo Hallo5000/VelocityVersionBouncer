@@ -29,11 +29,8 @@ public class PingHandler {
                 VelocityVersionBouncer.getLogger.info("Connecting to "+host.getAddress().getHostAddress()+":"+host.getPort());
                 socket.connect(host);
 
-                VelocityVersionBouncer.getLogger.info("Making streams...");
                 DataInputStream input = new DataInputStream(socket.getInputStream());
                 DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-
-                VelocityVersionBouncer.getLogger.info("Attempting handshake...");
 
                 byte [] handshakeMessage = createHandshakeMessage(host.getAddress().getHostAddress(), host.getPort());
 
@@ -96,7 +93,6 @@ public class PingHandler {
             if(now != pingtime) VelocityVersionBouncer.getLogger.warn("Something went wrong: the Pong Response Payload wasn't the same as the previously sent timestamp.");
             */
 
-                VelocityVersionBouncer.getLogger.info("Done!");
             }catch(IOException ex){
                 if(ex instanceof ConnectException) VelocityVersionBouncer.getLogger.info("Couldn't connect to " + server.getServerInfo().getName());
                 else VelocityVersionBouncer.getLogger.error("Error while pinging a backend server: ", ex);
