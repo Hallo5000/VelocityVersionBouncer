@@ -1,6 +1,7 @@
 package de.hallo5000.pingHandler;
 
 import com.velocitypowered.api.proxy.server.ServerPing;
+import net.kyori.adventure.text.Component;
 
 /**
  * Represents a ping result from one of the backend servers
@@ -9,10 +10,13 @@ import com.velocitypowered.api.proxy.server.ServerPing;
 public class BackendPingResult {
 
     private final ServerPing velocityPing; //can be replaced in the future with only possibly modifying getProtocol()
-    //private final ServerPing.Version version;
 
     public BackendPingResult(ServerPing ping){
         this.velocityPing = ping;
+    }
+
+    public BackendPingResult(int protocolVersionNumber){
+        this.velocityPing = new ServerPing(new ServerPing.Version(protocolVersionNumber, ""), null, Component.empty(), null);
     }
 
     /**

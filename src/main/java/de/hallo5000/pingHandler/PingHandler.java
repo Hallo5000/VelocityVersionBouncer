@@ -3,80 +3,84 @@ package de.hallo5000.pingHandler;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import de.hallo5000.main.VelocityVersionBouncer;
 
-import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 
 public class PingHandler {
 
     /**
      * Tries to do a Handshake with the given backend server and returns the JSON Response from the Status Response
+     * wrapped in a <code>CompletableFuture</code> as this is done async
      * @param server a backend server from the proxy this is called on
-     * @return the JSON Response by the backend server containing the server information, which might be incomplete/invalid json
+     * @return a <code>CompletableFuture</code> containing the JSON Response by the backend server containing the server information, which might be incomplete/invalid json
      */
-    public static @Nullable String ping(RegisteredServer server){
-        InetSocketAddress host = server.getServerInfo().getAddress();
-        try(Socket socket = new Socket()){
-            VelocityVersionBouncer.getLogger.info("Connecting to "+host.getAddress().toString()+"...");
-            socket.connect(host);
-            VelocityVersionBouncer.getLogger.info("Done!");
+    public static CompletableFuture<String> ping(RegisteredServer server){
+        return CompletableFuture.supplyAsync(() -> {
+            InetSocketAddress host = server.getServerInfo().getAddress();
+            String json = null;
+            try(Socket socket = new Socket()){
+                VelocityVersionBouncer.getLogger.info("Connecting to "+host.getAddress().getHostAddress()+":"+host.getPort());
+                socket.connect(host);
 
-            VelocityVersionBouncer.getLogger.info("Making streams...");
-            DataInputStream input = new DataInputStream(socket.getInputStream());
-            DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-            VelocityVersionBouncer.getLogger.info("Done!");
+                VelocityVersionBouncer.getLogger.info("Making streams...");
+                DataInputStream input = new DataInputStream(socket.getInputStream());
+                DataOutputStream output = new DataOutputStream(socket.getOutputStream());
 
-            VelocityVersionBouncer.getLogger.info("Attempting handshake...");
+                VelocityVersionBouncer.getLogger.info("Attempting handshake...");
 
-            byte [] handshakeMessage = createHandshakeMessage(host.getAddress().toString(), host.getPort());
+                byte [] handshakeMessage = createHandshakeMessage(host.getAddress().getHostAddress(), host.getPort());
 
-            // C->S : Handshake State=1
-            // send packet length and packet
-            writeVarInt(output, handshakeMessage.length);
-            output.write(handshakeMessage);
+                // C->S : Handshake State=1
+                // send packet length and packet
+                writeVarInt(output, handshakeMessage.length);
+                output.write(handshakeMessage);
+                output.flush();
 
-            // C->S : Request
-            writeVarInt(output, 0x01); //size is only 1
-            output.writeByte(0x00); //packet id for "Status Request"
+                // C->S : Request
+                writeVarInt(output, 0x01); //size is only 1
+                output.writeByte(0x00); //packet id for "Status Request"
+                output.flush();
 
+                // S->C : Response
+                readVarInt(input); //packet length
+                int packetId = readVarInt(input);
 
-            // S->C : Response
-            readVarInt(input); //packet length
-            int packetId = readVarInt(input);
+                if (packetId == -1) {
+                    throw new IOException("Premature end of stream.");
+                }
 
-            if (packetId == -1) {
-                throw new IOException("Premature end of stream.");
-            }
+                if (packetId != 0x00) { //we want a status response
+                    throw new IOException("Invalid packetID");
+                }
 
-            if (packetId != 0x00) { //we want a status response
-                throw new IOException("Invalid packetID");
-            }
+                int length = readVarInt(input); //length of json string (strings have their length prepended in addition to the packet length)
 
-            int length = readVarInt(input); //length of json string (strings have their length prepended in addition to the packet length)
+                if (length == -1) {
+                    throw new IOException("Premature end of stream.");
+                }
 
-            if (length == -1) {
-                throw new IOException("Premature end of stream.");
-            }
+                if (length == 0) {
+                    throw new IOException("Invalid string length.");
+                }
 
-            if (length == 0) {
-                throw new IOException("Invalid string length.");
-            }
+                byte[] in = new byte[length];
+                input.readFully(in);  //read json string
+                json = new String(in);
 
-            byte[] in = new byte[length];
-            input.readFully(in);  //read json string
-            String json = new String(in);
-
-
+            /* Ping and Pong are optionally and not needed for this case (I'll leave the code here if needed in the future)
             // C->S : Ping
             long now = System.currentTimeMillis();
             writeVarInt(output, 0x09); //size of packet (1 for id and 8 for long)
             output.writeByte(0x01); //0x01 for ping
             output.writeLong(now); //notchian clients sent there time stamp otherwise this field ("Payload") is useless
+            output.flush();
 
             // S->C : Pong
             readVarInt(input); //packet length
@@ -88,16 +92,17 @@ public class PingHandler {
             if (packetId != 0x01) {
                 throw new IOException("Invalid packetID");
             }
-            long pingtime = input.readLong(); //read response
+            long pingtime = input.readLong(); //read response (should be the same as 'Payload' in the Ping)
             if(now != pingtime) VelocityVersionBouncer.getLogger.warn("Something went wrong: the Pong Response Payload wasn't the same as the previously sent timestamp.");
+            */
 
-            System.out.println("Done!");
-
+                VelocityVersionBouncer.getLogger.info("Done!");
+            }catch(IOException ex){
+                if(ex instanceof ConnectException) VelocityVersionBouncer.getLogger.info("Couldn't connect to " + server.getServerInfo().getName());
+                else VelocityVersionBouncer.getLogger.error("Error while pinging a backend server: ", ex);
+            }
             return json;
-        }catch(IOException ex){
-            VelocityVersionBouncer.getLogger.error("Error while pinging a backend server: ", ex);
-        }
-        return null;
+        });
     }
 
     private static byte [] createHandshakeMessage(String host, int port) throws IOException {
@@ -105,7 +110,7 @@ public class PingHandler {
 
         DataOutputStream handshake = new DataOutputStream(buffer);
         handshake.writeByte(0x00); //packet id for handshake
-        writeVarInt(handshake, -1); //protocol version (-1 by convention for only getting server info)
+        writeVarInt(handshake, 774); //protocol version (-1 by convention for only getting server info but not accepted by some servers)
         writeString(handshake, host); // "Server Address" field
         handshake.writeShort(port); //port
         writeVarInt(handshake, 1); //state (1 for status)

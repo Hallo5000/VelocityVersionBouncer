@@ -2,9 +2,12 @@ package de.hallo5000.main;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import jakarta.json.Json;
+import jakarta.json.stream.JsonParser;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.io.StringReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -81,5 +84,31 @@ public class Utils {
         if(explicitRoutings.containsKey("c"+player.getClientBrand()))
             return VelocityVersionBouncer.getServer.getServer((String) explicitRoutings.get("c"+player.getClientBrand())).orElse(null);
         return null;
+    }
+
+    /**
+     * Takes in a JSON Payload from the Status Response packet in a Server List Ping
+     * @param json the JSON response field (can be obtained by <code>PingHandler.ping();</code>
+     * @return the protocol version number from the packet or <code>-1</code> if not found
+     */
+    public static int getProtocolFromHandshake(String json){
+        if(json == null) return -1;
+        JsonParser parser = Json.createParser(new StringReader(json));
+        boolean inVersion = false;
+
+        while(parser.hasNext()){
+            JsonParser.Event event = parser.next();
+            if(event == JsonParser.Event.KEY_NAME){
+                String key = parser.getString();
+                if(!inVersion && key.equals("version")){
+                    parser.next();//START_OBJECT
+                    inVersion = true;
+                }else if(inVersion && key.equals("protocol")){
+                    parser.next();//VALUE_NUMBER
+                    return parser.getInt();
+                }
+            }
+        }
+        return -1;
     }
 }

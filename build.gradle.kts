@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream
 plugins {
     id("java")
     id("io.papermc.hangar-publish-plugin") version "0.1.4"
+    id("com.gradleup.shadow") version "8.3.0"
 }
 
 group = "de.hallo5000"
@@ -24,6 +25,8 @@ dependencies {
     implementation("io.netty:netty-buffer:4.2.7.Final")
     implementation("io.netty:netty-codec:4.2.7.Final")
     implementation("io.netty:netty-transport:4.2.7.Final")
+    implementation("jakarta.json:jakarta.json-api:2.1.3")
+    implementation("org.eclipse.parsson:jakarta.json:1.1.7")
 }
 
 java {
@@ -34,6 +37,18 @@ tasks.register("printVersion") {
     doLast {
         println(project.version)
     }
+}
+
+tasks.jar {
+    enabled = false
+}
+
+tasks.build {
+    dependsOn(tasks.named("shadowJar"))
+}
+
+tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
+    archiveClassifier.set("")// remove the "-all" suffix
 }
 
 // Helper methods

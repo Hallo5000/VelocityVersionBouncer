@@ -5,6 +5,7 @@ import com.velocitypowered.api.event.proxy.server.ServerRegisteredEvent;
 import com.velocitypowered.api.event.proxy.server.ServerUnregisteredEvent;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import de.hallo5000.main.Utils;
 import de.hallo5000.main.VelocityVersionBouncer;
 import org.slf4j.Logger;
 
@@ -69,16 +70,10 @@ public class BackendPingService {
      * @throws NullPointerException if the given <code>RegisteredServer</code> is null
      */
     public CompletableFuture<?> ping(RegisteredServer server){
-        return server.ping().whenComplete((result, error) -> {
-            if (error != null) {
-                if(error instanceof java.net.ConnectException
-                        || error instanceof java.net.NoRouteToHostException
-                        || error instanceof java.net.SocketTimeoutException) logger.info("Ping FAILED for " + server.getServerInfo().getName() + " (server is offline)");
-                if(error instanceof io.netty.handler.codec.CorruptedFrameException //may be irrelevant because the CorruptedFrameException is handled by the Decoder Exception
-                        || error instanceof io.netty.handler.codec.DecoderException) logger.info("Ping FAILED for " + server.getServerInfo().getName() + " (ping response is corrupted)");
-            }else{
-                pingCache.put(server, new BackendPingResult(result));
-                logger.info("Ping SUCCESSFUL for " + server.getServerInfo().getName() + " - protocol version: " + pingCache.get(server).getProtocol());
+        return PingHandler.ping(server).whenComplete((result, error) -> {
+            pingCache.put(server, new BackendPingResult(Utils.getProtocolFromHandshake(result)));
+            if(pingCache.get(server).getProtocol() != -1){
+                logger.info("Ping SUCCESSFUL for " + server.getServerInfo().getName() + " - protocol version number: " + pingCache.get(server).getProtocol());
             }
         });
     }
@@ -90,7 +85,7 @@ public class BackendPingService {
      */
     public OptionalInt getProtocol(RegisteredServer server){
         BackendPingResult result = pingCache.get(server);
-        if(result == null) return OptionalInt.empty();
+        if(result == null || result.getProtocol() == -1) return OptionalInt.empty();
         return OptionalInt.of(result.getProtocol());
     }
 
