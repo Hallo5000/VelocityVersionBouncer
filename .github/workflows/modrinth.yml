@@ -57,6 +57,7 @@ jobs:
             --arg changelog "$CHANGELOG" \
             --arg project_id "X5ETMik1" \
             --argjson dependencies '[]' \
+            --argjson featured false \
             '{
               name: $name,
               version_number: $version_number,
@@ -67,7 +68,8 @@ jobs:
               changelog: $changelog,
               file_parts: ["file"],
               primary_file: "file",
-              dependencies: $dependencies
+              dependencies: $dependencies,
+              featured: $featured
             }')
 
           # Upload to Modrinth
