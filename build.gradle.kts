@@ -47,6 +47,12 @@ tasks.build {
     dependsOn(tasks.named("shadowJar"))
 }
 
+afterEvaluate {
+    tasks.findByName("publishPluginPublicationToHangar")?.apply {
+        dependsOn(tasks.named("shadowJar"))
+    }
+}
+
 tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
     archiveClassifier.set("")// remove the "-all" suffix
 }
@@ -91,7 +97,7 @@ hangarPublish {
         platforms {
             register(Platforms.VELOCITY) {
                 // Set the JAR file to upload
-                jar.set(tasks.jar.flatMap { it.archiveFile })
+                jar.set(tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar").flatMap { it.archiveFile })
 
                 // Set platform versions from gradle.properties file
                 val versions: List<String> = (property("velocityVersion") as String)

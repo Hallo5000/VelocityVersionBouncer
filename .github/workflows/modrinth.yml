@@ -64,16 +64,12 @@ jobs:
               game_versions: $game_versions,
               project_id: $project_id,
               changelog: $changelog,
-              files: [
-                {
-                  "file": "VelocityVersionBouncer-$VERSION.jar",
-                  "primary": true
-                }
-              ]
+              file_parts: ["file"],
+              primary_file: "file"
             }')
 
           # Upload to Modrinth
           curl -X POST https://api.modrinth.com/v2/version \
             -H "Authorization: Bearer $MODRINTH_TOKEN" \
             -F "data=$JSON_PAYLOAD;type=application/json" \
-            -F "files[]=@$JAR_PATH"
+            -F "file=@$JAR_PATH"
