@@ -20,18 +20,17 @@ import java.nio.file.Path;
 /*
 TODO:
 - Modrinth
-- explicit mapping ('v'/version prefix not yet implemented and need to find out the syntax for version prefix)
 - override versions on HangarMC
 - modlists
 - ViaVersion detect
 - language files (+color code support)
 - config-version in config
-- rework main class
-- custom ping backend servers
+- ServerListPing override with bouncer (ProxyPingEvent)
+- my own logger so that the plugins name will be show in the console instead of the id
 */
 
 
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.2.2-SNAPSHOT",
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.3.0-release",
         url = "https://github.com/Hallo5000/VelocityVersionBouncer",
         description = "This plugin redirects players to server depending on there game version",
         authors = {"Hallo5000"})
@@ -40,20 +39,18 @@ public class VelocityVersionBouncer {
     private final ProxyServer server;
     private final Logger logger;
     private final Path dataDirectory;
-
-    public static ProxyServer getServer;
-    public static Logger getLogger;
-    public static Toml toml;
-    public static BackendPingService ps;
+    private final Utils utils;
+    private final BackendPingService backendPingService;
+    private Toml toml;
 
     @Inject
     public VelocityVersionBouncer(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
         this.server = server;
         this.logger = logger;
-        this.dataDirectory = dataDirectory;
+        this.dataDirectory = dataDirectory; //.getParent().resolve(this.getClass().getAnnotation(Plugin.class).name());
 
-        getServer = server;
-        getLogger = logger;
+        this.utils = new Utils(this);
+        this.backendPingService = new BackendPingService(logger, this, server);
 
         logger.info("Successfully loaded!");
     }
@@ -62,11 +59,10 @@ public class VelocityVersionBouncer {
     public void onInitialize(ProxyInitializeEvent e) {
         toml = loadConfig();
 
-        ps = new BackendPingService(logger, this, server);
-        ps.start();
+        backendPingService.start();
 
-        server.getEventManager().register(this, new PlayerChooseInitialServerListener());
-        server.getEventManager().register(this, new KickedFromServerListener());
+        server.getEventManager().register(this, new PlayerChooseInitialServerListener(this));
+        server.getEventManager().register(this, new KickedFromServerListener(this));
     }
 
     private Toml loadConfig() {
@@ -81,4 +77,25 @@ public class VelocityVersionBouncer {
             return null;
         }
     }
+
+    public ProxyServer getServer(){
+        return server;
+    }
+
+    public Logger getLogger(){
+        return logger;
+    }
+
+    public Utils getUtils(){
+        return utils;
+    }
+
+    public BackendPingService getBackendPingService(){
+        return backendPingService;
+    }
+
+    public Toml getToml(){
+        return toml;
+    }
+
 }

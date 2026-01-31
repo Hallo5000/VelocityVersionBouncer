@@ -11,26 +11,29 @@ import java.io.StringReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.hallo5000.main.VelocityVersionBouncer.toml;
-
 public class Utils {
-
+    
+    private final VelocityVersionBouncer plugin;
+    public Utils(VelocityVersionBouncer plugin){
+        this.plugin = plugin;
+    }
+    
     /**
      * Gets the whitelist and blacklist from the plugins config.yml and computes the resulting 'serverlist'
      * @return a list of <code>RegisteredServer</code>s, may be empty but not null
      */
-    public static @NotNull List<RegisteredServer> getConfigServerList(){
+    public @NotNull List<RegisteredServer> getConfigServerList(){
         //take all backend servers or only the ones provided by the whitelist (if one exists) and remove the ones on the blacklist
-        List<RegisteredServer> serverList = (new ArrayList<>(toml.getList("whitelist")))
-                .stream().map(name -> VelocityVersionBouncer.getServer.getServer((String) name).orElseGet(() -> {
-                    VelocityVersionBouncer.getLogger.info("'" + name + "' could not be found!");
+        List<RegisteredServer> serverList = (new ArrayList<>(plugin.getToml().getList("whitelist")))
+                .stream().map(name -> plugin.getServer().getServer((String) name).orElseGet(() -> {
+                    plugin.getLogger().info("'" + name + "' could not be found!");
                     return null;
                 })).filter(Objects::nonNull).collect(Collectors.toList());
-        if(serverList.isEmpty()) serverList = new ArrayList<>(VelocityVersionBouncer.getServer.getAllServers());
-        List<RegisteredServer> blacklist = Optional.ofNullable(toml.getList("blacklist"))
+        if(serverList.isEmpty()) serverList = new ArrayList<>(plugin.getServer().getAllServers());
+        List<RegisteredServer> blacklist = Optional.ofNullable(plugin.getToml().getList("blacklist"))
                 .orElse(new ArrayList<>(Collections.emptyList()))
-                .stream().map(name -> VelocityVersionBouncer.getServer.getServer((String) name).orElseGet(() -> {
-                    VelocityVersionBouncer.getLogger.info("'"+ name + "' could not be found!");
+                .stream().map(name -> plugin.getServer().getServer((String) name).orElseGet(() -> {
+                    plugin.getLogger().info("'"+ name + "' could not be found!");
                     return null;
                 })).filter(Objects::nonNull).toList();
         serverList.removeAll(blacklist);
@@ -43,11 +46,11 @@ public class Utils {
      * @return the first found server or null if no server is found
      * @throws NullPointerException when player is null
      */
-    public static @Nullable RegisteredServer checkForExplicitRouting(Player player){
+    public @Nullable RegisteredServer checkForExplicitRouting(Player player){
         Map<String, Object> explicitRoutings = new TreeMap<>();
         //takes all valid explicit routings
-        for(String s : toml.getTable("explicit-routing").toMap().keySet()){
-            if(!s.isEmpty() && s.matches("^((p\\d{3})|(v\\d+.\\d+.\\d+))?(c[^\\d]+)?$")) explicitRoutings.put(s, toml.getTable("explicit-routing").toMap().get(s));
+        for(String s : plugin.getToml().getTable("explicit-routing").toMap().keySet()){
+            if(!s.isEmpty() && s.matches("^((p\\d{3})|(v\\d+.\\d+.\\d+))?(c[^\\d]+)?$")) explicitRoutings.put(s, plugin.getToml().getTable("explicit-routing").toMap().get(s));
         }
         //removes all explicit routings with unmatching client brands
         for(String s : new HashSet<>(explicitRoutings.keySet())){
@@ -60,11 +63,11 @@ public class Utils {
                 if(s.startsWith("p")){
                     if(!s.startsWith("p"+player.getProtocolVersion().getProtocol())) explicitRoutings.remove(s);
                     else if(s.endsWith("c"+player.getClientBrand()))
-                        return VelocityVersionBouncer.getServer.getServer((String) explicitRoutings.get(s)).orElse(null);
+                        return plugin.getServer().getServer((String) explicitRoutings.get(s)).orElse(null);
                 }
             }
             String serverName = (String) explicitRoutings.get("p" + player.getProtocolVersion().getProtocol());
-            return VelocityVersionBouncer.getServer.getServer(serverName).orElse(null);
+            return plugin.getServer().getServer(serverName).orElse(null);
         }
         //matching game versions + optional client brand
         for(String v : player.getProtocolVersion().getVersionsSupportedBy()){
@@ -73,16 +76,16 @@ public class Utils {
                     if(s.startsWith("v")){
                         if(!s.startsWith("v"+v)) explicitRoutings.remove(s);
                         else if(s.endsWith("c"+player.getClientBrand()))
-                            return VelocityVersionBouncer.getServer.getServer((String) explicitRoutings.get(s)).orElse(null);
+                            return plugin.getServer().getServer((String) explicitRoutings.get(s)).orElse(null);
                     }
                 }
                 String serverName = (String) explicitRoutings.get("v"+v);
-                return VelocityVersionBouncer.getServer.getServer(serverName).orElse(null);
+                return plugin.getServer().getServer(serverName).orElse(null);
             }
         }
         //match with only client brand
         if(explicitRoutings.containsKey("c"+player.getClientBrand()))
-            return VelocityVersionBouncer.getServer.getServer((String) explicitRoutings.get("c"+player.getClientBrand())).orElse(null);
+            return plugin.getServer().getServer((String) explicitRoutings.get("c"+player.getClientBrand())).orElse(null);
         return null;
     }
 

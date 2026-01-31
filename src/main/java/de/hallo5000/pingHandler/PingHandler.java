@@ -14,19 +14,23 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
 public class PingHandler {
-
+    
+    private final VelocityVersionBouncer plugin;
+    public PingHandler(VelocityVersionBouncer plugin){
+        this.plugin = plugin;
+    }
     /**
      * Tries to do a Handshake with the given backend server and returns the JSON Response from the Status Response
      * wrapped in a <code>CompletableFuture</code> as this is done async
      * @param server a backend server from the proxy this is called on
      * @return a <code>CompletableFuture</code> containing the JSON Response by the backend server containing the server information, which might be incomplete/invalid json
      */
-    public static CompletableFuture<String> ping(RegisteredServer server){
+    protected CompletableFuture<String> ping(RegisteredServer server){
         return CompletableFuture.supplyAsync(() -> {
             InetSocketAddress host = server.getServerInfo().getAddress();
             String json = null;
             try(Socket socket = new Socket()){
-                VelocityVersionBouncer.getLogger.info("Connecting to "+host.getAddress().getHostAddress()+":"+host.getPort());
+                plugin.getLogger().info("Connecting to "+host.getAddress().getHostAddress()+":"+host.getPort());
                 socket.connect(host);
 
                 DataInputStream input = new DataInputStream(socket.getInputStream());
@@ -90,12 +94,12 @@ public class PingHandler {
                 throw new IOException("Invalid packetID");
             }
             long pingtime = input.readLong(); //read response (should be the same as 'Payload' in the Ping)
-            if(now != pingtime) VelocityVersionBouncer.getLogger.warn("Something went wrong: the Pong Response Payload wasn't the same as the previously sent timestamp.");
+            if(now != pingtime) plugin.getLogger().warn("Something went wrong: the Pong Response Payload wasn't the same as the previously sent timestamp.");
             */
 
             }catch(IOException ex){
-                if(ex instanceof ConnectException) VelocityVersionBouncer.getLogger.info("Couldn't connect to " + server.getServerInfo().getName());
-                else VelocityVersionBouncer.getLogger.error("Error while pinging a backend server: ", ex);
+                if(ex instanceof ConnectException) plugin.getLogger().info("Couldn't connect to " + server.getServerInfo().getName());
+                else plugin.getLogger().error("Error while pinging a backend server: ", ex);
             }
             return json;
         });

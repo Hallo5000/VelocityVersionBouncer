@@ -15,6 +15,10 @@ public class BackendPingResult {
         this.velocityPing = ping;
     }
 
+    /**
+     * Internally creates a <code>ServerPing</code> object with empty fields except for the protocol version
+     * @param protocolVersionNumber the protocol version as int wrapped in this class
+     */
     public BackendPingResult(int protocolVersionNumber){
         this.velocityPing = new ServerPing(new ServerPing.Version(protocolVersionNumber, ""), null, Component.empty(), null);
     }

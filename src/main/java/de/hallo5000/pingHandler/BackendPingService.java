@@ -17,14 +17,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import static de.hallo5000.main.VelocityVersionBouncer.toml;
-
 public class BackendPingService {
 
     private final Logger logger;
     private final VelocityVersionBouncer plugin;
     private final ProxyServer server;
     private final Map<RegisteredServer, BackendPingResult> pingCache;
+    private final PingHandler pingHandler;
 
     /**
      * Initializes the internal Objects (the pingCache Map is initialized as <code>ConcurrentHashMap</code>
@@ -37,6 +36,7 @@ public class BackendPingService {
         this.plugin = plugin;
         this.server = server;
         this.pingCache = new ConcurrentHashMap<>();
+        this.pingHandler = new PingHandler(plugin);
     }
 
     /**
@@ -46,7 +46,7 @@ public class BackendPingService {
     public void start(){
         server.getScheduler()
                 .buildTask(plugin, this::pingAll)
-                .repeat(toml.getLong("ping-intervall"), TimeUnit.SECONDS)
+                .repeat(plugin.getToml().getLong("ping-intervall"), TimeUnit.SECONDS)
                 .schedule();
         server.getEventManager().register(plugin, this);
     }
@@ -70,7 +70,7 @@ public class BackendPingService {
      * @throws NullPointerException if the given <code>RegisteredServer</code> is null
      */
     public CompletableFuture<?> ping(RegisteredServer server){
-        return PingHandler.ping(server).whenComplete((result, error) -> {
+        return pingHandler.ping(server).whenComplete((result, error) -> {
             pingCache.put(server, new BackendPingResult(Utils.getProtocolFromHandshake(result)));
             if(pingCache.get(server).getProtocol() != -1){
                 logger.info("Ping SUCCESSFUL for " + server.getServerInfo().getName() + " - protocol version number: " + pingCache.get(server).getProtocol());

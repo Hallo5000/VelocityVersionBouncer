@@ -15,13 +15,11 @@
 - **What happens if no compatible server is found?** The client will simply be disconnected with the according note/reason.
 - **Does this work with modded minecraft servers?** If you're using setups like Ambassador+ProxyCompatibleForge [(more information)](https://docs.papermc.io/velocity/server-compatibility) this plugin will route the client based purely on their protocol version (game version), not their installed mods. _Note: This setup has only been tested with PaperMC and (Neo)Forge servers._
 ### 📦 Installation & 🛠️ Requirements
-1. Download the `.jar` file of the last stable release ([here](https://github.com/Hallo5000/VelocityVersionBouncer/blob/master/build/libs/VelocityVersionBouncer-1.2.0-release.jar)) or build it yourself (the gradle files are included).
+1. Download the `.jar` file of the last stable release ([here](https://github.com/Hallo5000/VelocityVersionBouncer/blob/master/build/libs/VelocityVersionBouncer-1.3.0-release.jar)) or build it yourself (the gradle files are included).
 2. Put the file in your servers `plugins/` folder (only the proxy!) and restart the server once to generate the config file.
 3. When you're finished editing the config restart the proxy once more and everything should be working.
 _Note: this plugin may not work properly if you are not running on `Java 21` (or higher) and `Velocity 3.4.0` or above_
-
-### Known Bugs:
-- Some mods modify the servers ping request resulting in an error in velocity and a failed routing. This is probably the case if you see `(ping response is corrupted)` as a reason for a failed ping. (I'm currently working on a solution but you can also just use the explicit-routing feature available since `1.2.0-release`)
+4. If you're having problems: make sure you're not using a snapshot (as these are expected to be unstable and this README is always explaining the latest release anyway), if there's still a problem feel free to open an issue on the plugins GitHub repository.
 
 ## Example Config:
 ```toml
