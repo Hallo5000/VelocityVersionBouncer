@@ -92,4 +92,4 @@ jobs:
           curl -X PATCH https://api.modrinth.com/v2/project/X5ETMik1 \
             -H "Authorization: Bearer $MODRINTH_TOKEN" \
             -H "Content-Type: application/json" \
-            -d $json_body
+            -d "$json_body"
