@@ -5,14 +5,11 @@ import com.velocitypowered.api.event.proxy.server.ServerRegisteredEvent;
 import com.velocitypowered.api.event.proxy.server.ServerUnregisteredEvent;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import de.hallo5000.main.Utils;
+import com.velocitypowered.api.proxy.server.ServerPing;
 import de.hallo5000.main.VelocityVersionBouncer;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.OptionalInt;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +19,7 @@ public class BackendPingService {
     private final Logger logger;
     private final VelocityVersionBouncer plugin;
     private final ProxyServer server;
-    private final Map<RegisteredServer, BackendPingResult> pingCache;
+    private final Map<RegisteredServer, Optional<ServerPing>> pingCache;
     private final PingHandler pingHandler;
 
     /**
@@ -70,11 +67,17 @@ public class BackendPingService {
      * @throws NullPointerException if the given <code>RegisteredServer</code> is null
      */
     public CompletableFuture<?> ping(RegisteredServer server){
-        return pingHandler.ping(server).whenComplete((result, error) -> {
-            pingCache.put(server, new BackendPingResult(Utils.getProtocolFromHandshake(result)));
-            if(pingCache.get(server).getProtocol() != -1){
-                logger.info("Ping SUCCESSFUL for " + server.getServerInfo().getName() + " - protocol version number: " + pingCache.get(server).getProtocol());
-            }else logger.info("Ping FAILED for " + server.getServerInfo().getName());
+        return pingHandler.ping(server).whenComplete((json, error) -> {
+            if(error != null) plugin.getLogger().error("while pinging: ", error);
+            if(json != null){
+                pingCache.put(server, Optional.of(plugin.getUtils().getPingFromHandshake(json)));
+                if(getProtocol(server).isPresent()){
+                    logger.info("Ping SUCCESSFUL for " + server.getServerInfo().getName() + " - protocol version number: " + getProtocol(server));
+                    return;
+                }
+            }
+            if(!pingCache.containsKey(server)) pingCache.put(server, Optional.empty());
+            logger.info("Ping FAILED for " + server.getServerInfo().getName());
         });
     }
 
@@ -84,9 +87,16 @@ public class BackendPingService {
      * @return an OptionalInt containing the ping if present in the ping cache or else <code>OptionalInt.empty()</code>
      */
     public OptionalInt getProtocol(RegisteredServer server){
-        BackendPingResult result = pingCache.get(server);
-        if(result == null || result.getProtocol() == -1) return OptionalInt.empty();
-        return OptionalInt.of(result.getProtocol());
+        return getPing(server).map(p -> OptionalInt.of(p.getVersion().getProtocol())).orElse(OptionalInt.empty());
+    }
+
+    /**
+     * Getter for a <code>ServerPing</code> saved in the internal ping cache
+     * @param server the server whose ping to lookup
+     * @return an <code>Optional<ServerPing></code> containing the servers ping response or empty if there was none the last time the server was pinged
+     */
+    public Optional<ServerPing> getPing(RegisteredServer server){
+        return pingCache.get(server);
     }
 
     @Subscribe

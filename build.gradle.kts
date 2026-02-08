@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "de.hallo5000"
-version = "1.3.0-release"
+version = "1.3.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -47,12 +47,6 @@ tasks.build {
     dependsOn(tasks.named("shadowJar"))
 }
 
-afterEvaluate {
-    tasks.findByName("publishPluginPublicationToHangar")?.apply {
-        dependsOn(tasks.named("shadowJar"))
-    }
-}
-
 tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
     archiveClassifier.set("")// remove the "-all" suffix
 }
@@ -81,9 +75,25 @@ val suffixedVersion: String = if (isRelease) {
     versionString + "+" + System.getenv("GITHUB_RUN_NUMBER")
 }
 
-// Use the commit description for the changelog
-//val changelogContent: String = latestCommitMessage()
-//replaced by CHANGELOG env-var
+val shadowJarFile = layout.buildDirectory.file(
+    "libs/${project.name}-${project.version}.jar"
+)
+
+afterEvaluate {
+    tasks.findByName("publishPluginPublicationToHangar")?.apply {
+        inputs.file(shadowJarFile)
+
+        doFirst {
+            val file = shadowJarFile.get().asFile
+            if (!file.exists()) {
+                throw GradleException(
+                    "Publish aborted: Artifact not found.\n" +
+                            "Run './gradlew build' before publishing."
+                )
+            }
+        }
+    }
+}
 
 val README: String = project.file("README.md").readText(Charsets.UTF_8)
 
@@ -97,7 +107,8 @@ hangarPublish {
         platforms {
             register(Platforms.VELOCITY) {
                 // Set the JAR file to upload
-                jar.set(tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar").flatMap { it.archiveFile })
+                //jar.set(tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar").flatMap { it.archiveFile })
+                jar.set(shadowJarFile)
 
                 // Set platform versions from gradle.properties file
                 val versions: List<String> = (property("velocityVersion") as String)

@@ -9,6 +9,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import de.hallo5000.listener.KickedFromServerListener;
 import de.hallo5000.listener.PlayerChooseInitialServerListener;
+import de.hallo5000.listener.ProxyPingListener;
 import de.hallo5000.pingHandler.BackendPingService;
 import org.slf4j.Logger;
 
@@ -19,7 +20,7 @@ import java.nio.file.Path;
 
 /*
 TODO:
-- Modrinth
+- Modrinth (update description)
 - override versions on HangarMC
 - modlists
 - ViaVersion detect
@@ -27,10 +28,11 @@ TODO:
 - config-version in config
 - ServerListPing override with bouncer (ProxyPingEvent)
 - my own logger so that the plugins name will be show in the console instead of the id
+- timeout for pings
 */
 
 
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.3.0-release",
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.3.1-SNAPSHOT",
         url = "https://github.com/Hallo5000/VelocityVersionBouncer",
         description = "This plugin redirects players to server depending on there game version",
         authors = {"Hallo5000"})
@@ -40,6 +42,7 @@ public class VelocityVersionBouncer {
     private final Logger logger;
     private final Path dataDirectory;
     private final Utils utils;
+    private final JsonReader jsonReader;
     private final BackendPingService backendPingService;
     private Toml toml;
 
@@ -50,6 +53,7 @@ public class VelocityVersionBouncer {
         this.dataDirectory = dataDirectory; //.getParent().resolve(this.getClass().getAnnotation(Plugin.class).name());
 
         this.utils = new Utils(this);
+        this.jsonReader = new JsonReader(this);
         this.backendPingService = new BackendPingService(logger, this, server);
 
         logger.info("Successfully loaded!");
@@ -63,6 +67,7 @@ public class VelocityVersionBouncer {
 
         server.getEventManager().register(this, new PlayerChooseInitialServerListener(this));
         server.getEventManager().register(this, new KickedFromServerListener(this));
+        server.getEventManager().register(this, new ProxyPingListener(this));
     }
 
     private Toml loadConfig() {
@@ -88,6 +93,10 @@ public class VelocityVersionBouncer {
 
     public Utils getUtils(){
         return utils;
+    }
+
+    public JsonReader getJsonReader(){
+        return jsonReader;
     }
 
     public BackendPingService getBackendPingService(){
