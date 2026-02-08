@@ -20,7 +20,7 @@ public class KickedFromServerListener {
     public void onPlayerKick(KickedFromServerEvent e){
         if(plugin.getToml().getBoolean("enable-fallback-bouncing")){
             if(plugin.getToml().getString("explicit-fallback-server").equalsIgnoreCase("")){ //there is no explicit fallback server
-                plugin.getLogger().info("[FALLBACK] Start checking for compatibilities (Clientprotocol: " + e.getPlayer().getProtocolVersion().getProtocol() + ")");
+                plugin.getLogger().info("[FALLBACK] Start checking for compatibilities (Client-Protocol: " + e.getPlayer().getProtocolVersion().getProtocol() + ")");
                 RegisteredServer match = plugin.getUtils().checkForExplicitRouting(e.getPlayer());
                 if (match != null && !(plugin.getToml().getBoolean("exclude-previous-server") && match == e.getServer())) {
                     plugin.getLogger().info("Connects to explicitly declared server: " + match.getServerInfo().getName());

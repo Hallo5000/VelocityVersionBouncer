@@ -72,8 +72,17 @@ jobs:
               featured: $featured
             }')
 
-          # Upload to Modrinth
+          # Upload new project version
           curl -X POST https://api.modrinth.com/v2/version \
             -H "Authorization: Bearer $MODRINTH_TOKEN" \
             -F "data=$JSON_PAYLOAD;type=application/json" \
             -F "file=@$JAR_PATH"
+      - name: Update the projects description (body)
+        run: |
+          CONTENT=$(sed "s/'/\\'/g" README.md)
+          
+          # Update project description
+          curl -X PATCH https://api.modrinth.com/v2/project/X5ETMik1 \
+            -H "Authorization: Bearer $MODRINTH_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"body":"'"$CONTENT"'"}'

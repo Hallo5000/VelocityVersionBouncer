@@ -29,7 +29,7 @@ public class PlayerChooseInitialServerListener {
         String distribution = Optional.ofNullable(plugin.getToml().getString("distribution")).orElse("FIRST-MATCH");
 
         //start checking
-        plugin.getLogger().info("Start checking for compatibilities (Clientprotocol: " + e.getPlayer().getProtocolVersion().getProtocol() + ")");
+        plugin.getLogger().info("Start checking for compatibilities (Client-Protocol: " + e.getPlayer().getProtocolVersion().getProtocol() + ")");
         List<RegisteredServer> matches = new ArrayList<>(); //every server with matching protocol version
         for(RegisteredServer s : plugin.getUtils().getConfigServerList()){
             plugin.getLogger().info("Check " + s.getServerInfo().getName() + " with protocol " + plugin.getBackendPingService().getProtocol(s));

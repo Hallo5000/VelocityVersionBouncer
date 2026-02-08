@@ -20,7 +20,7 @@ public class JsonReader {
         this.plugin = plugin;
     }
 
-    public boolean findKeyInJson(JsonParser parser, String[] path){
+    private boolean findKeyInJson(JsonParser parser, String[] path){
         if(path == null || path.length == 0) return false;
         int next_i = 0;
         JsonParser.Event event;

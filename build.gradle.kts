@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "de.hallo5000"
-version = "1.3.1-SNAPSHOT"
+version = "1.4.0-release"
 
 repositories {
     mavenCentral()
@@ -95,7 +95,7 @@ afterEvaluate {
     }
 }
 
-val README: String = project.file("README.md").readText(Charsets.UTF_8)
+val readme: String = project.file("README.md").readText(Charsets.UTF_8)
 
 hangarPublish {
     publications.register("plugin") {
@@ -117,6 +117,6 @@ hangarPublish {
                 platformVersions.set(versions)
             }
         }
-        pages.resourcePage(README)
+        pages.resourcePage(readme)
     }
 }

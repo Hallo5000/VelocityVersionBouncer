@@ -21,18 +21,18 @@ public class ProxyPingListener {
         if(!plugin.getToml().getBoolean("server-list-ping")) return;
 
         plugin.getLogger().info("Server List Ping incoming...");
-        /*RegisteredServer match = plugin.getUtils().checkForExplicitRouting(e.getPlayer());
+        RegisteredServer match = plugin.getUtils().checkForExplicitRouting(e.getConnection());
         if (match != null) {
-            plugin.getLogger().info("Connects to explicitly declared server: " + match.getServerInfo().getName());
+            plugin.getLogger().info("Matches explicitly declared server: " + match.getServerInfo().getName());
             if(plugin.getBackendPingService().getPing(match).isPresent()) e.setPing(plugin.getBackendPingService().getPing(match).get());
             return;
-        }*/
+        }
 
         //Toml Vars
         String distribution = Optional.ofNullable(plugin.getToml().getString("distribution")).orElse("FIRST-MATCH");
 
         //start checking
-        plugin.getLogger().info("Start checking for compatibilities (Clientprotocol: " + e.getConnection().getProtocolVersion().getProtocol() + ")");
+        plugin.getLogger().info("Start checking for compatibilities (Client-Protocol: " + e.getConnection().getProtocolVersion().getProtocol() + ")");
         List<RegisteredServer> matches = new ArrayList<>(); //every server with matching protocol version
         for(RegisteredServer s : plugin.getUtils().getConfigServerList()){
             plugin.getLogger().info("Check " + s.getServerInfo().getName() + " with protocol " + plugin.getBackendPingService().getProtocol(s));
@@ -49,7 +49,7 @@ public class ProxyPingListener {
                     if(s.getPlayersConnected().size() < finalServer.getPlayersConnected().size()) finalServer = s;
                 }
             }
-            plugin.getLogger().info("Connects to: " + finalServer.getServerInfo().getName());
+            plugin.getLogger().info("Matches to: " + finalServer.getServerInfo().getName());
             if(plugin.getBackendPingService().getPing(finalServer).isPresent()) e.setPing(plugin.getBackendPingService().getPing(finalServer).get());
         }
     }

@@ -20,19 +20,18 @@ import java.nio.file.Path;
 
 /*
 TODO:
-- Modrinth (update description)
-- override versions on HangarMC
-- modlists
+- override versions on HangarMC and Modrinth
+- fix changelog in workflows
 - ViaVersion detect
 - language files (+color code support)
 - config-version in config
-- ServerListPing override with bouncer (ProxyPingEvent)
+- ServerListPing modInfo
 - my own logger so that the plugins name will be show in the console instead of the id
 - timeout for pings
 */
 
 
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.3.1-SNAPSHOT",
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.4.0-release",
         url = "https://github.com/Hallo5000/VelocityVersionBouncer",
         description = "This plugin redirects players to server depending on there game version",
         authors = {"Hallo5000"})
@@ -55,8 +54,6 @@ public class VelocityVersionBouncer {
         this.utils = new Utils(this);
         this.jsonReader = new JsonReader(this);
         this.backendPingService = new BackendPingService(logger, this, server);
-
-        logger.info("Successfully loaded!");
     }
 
     @Subscribe
@@ -68,6 +65,8 @@ public class VelocityVersionBouncer {
         server.getEventManager().register(this, new PlayerChooseInitialServerListener(this));
         server.getEventManager().register(this, new KickedFromServerListener(this));
         server.getEventManager().register(this, new ProxyPingListener(this));
+
+        logger.info("Successfully loaded!");
     }
 
     private Toml loadConfig() {

@@ -1,6 +1,7 @@
 package de.hallo5000.main;
 
 import com.google.gson.Gson;
+import com.velocitypowered.api.proxy.InboundConnection;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerPing;
@@ -44,40 +45,44 @@ public class Utils {
 
     /**
      * Gets all explicit routings from the plugins config.yml and searches for matching routings (may not be in order)
-     * @param player the client whose protocol to compare the explicit routings to
+     * @param inboundConnection the client whose protocol to compare the explicit routings to
      * @return the first found server or null if no server is found
-     * @throws NullPointerException when player is null
      */
-    public @Nullable RegisteredServer checkForExplicitRouting(Player player){
-        Map<String, Object> explicitRoutings = new TreeMap<>();
-        //takes all valid explicit routings
-        for(String s : plugin.getToml().getTable("explicit-routing").toMap().keySet()){
-            if(!s.isEmpty() && s.matches("^((p\\d{3})|(v\\d+.\\d+.\\d+))?(c[^\\d]+)?$")) explicitRoutings.put(s, plugin.getToml().getTable("explicit-routing").toMap().get(s));
+    public @Nullable RegisteredServer checkForExplicitRouting(InboundConnection inboundConnection){
+        if(inboundConnection == null) return null;
+        int protocol = inboundConnection.getProtocolVersion().getProtocol();
+        String clientBrand = "";
+        if(inboundConnection instanceof Player p) clientBrand = p.getClientBrand();
+        
+        Map<String, Object> explicitRoutings = new LinkedHashMap<>(plugin.getToml().getTable("explicit-routing").toMap());
+        //removes all invalid explicit routings
+        for(String s : explicitRoutings.keySet()){
+            if(s.isEmpty() || !s.matches("^(?=[pvc])((p\\d{3})|(v1.\\d+.\\d+))?(c\\S+)?$")) explicitRoutings.remove(s);
         }
         //removes all explicit routings with unmatching client brands
         for(String s : new HashSet<>(explicitRoutings.keySet())){
-            if(s.contains("c") && !s.endsWith("c"+player.getClientBrand())) explicitRoutings.remove(s);
+            if(s.contains("c") && !s.endsWith("c"+clientBrand)) explicitRoutings.remove(s);
         }
         //matching protocol version + optional client brand
-        if(explicitRoutings.keySet().stream().anyMatch(r -> r.startsWith("p"+player.getProtocolVersion().getProtocol()))) {
+        if(explicitRoutings.keySet().stream().anyMatch(r -> r.startsWith("p"+protocol))) {
             //at this point there is at least one match for the protocol version number
             for(String s : new HashSet<>(explicitRoutings.keySet())){
                 if(s.startsWith("p")){
-                    if(!s.startsWith("p"+player.getProtocolVersion().getProtocol())) explicitRoutings.remove(s);
-                    else if(s.endsWith("c"+player.getClientBrand()))
+                    if(!s.startsWith("p"+protocol)) explicitRoutings.remove(s);
+                    else if(s.endsWith("c"+clientBrand))
                         return plugin.getServer().getServer((String) explicitRoutings.get(s)).orElse(null);
                 }
             }
-            String serverName = (String) explicitRoutings.get("p" + player.getProtocolVersion().getProtocol());
+            String serverName = (String) explicitRoutings.get("p" + protocol);
             return plugin.getServer().getServer(serverName).orElse(null);
         }
         //matching game versions + optional client brand
-        for(String v : player.getProtocolVersion().getVersionsSupportedBy()){
+        for(String v : inboundConnection.getProtocolVersion().getVersionsSupportedBy()){
             if(explicitRoutings.keySet().stream().anyMatch(r -> r.startsWith("v"+v))){
                 for(String s : new HashSet<>(explicitRoutings.keySet())){
                     if(s.startsWith("v")){
                         if(!s.startsWith("v"+v)) explicitRoutings.remove(s);
-                        else if(s.endsWith("c"+player.getClientBrand()))
+                        else if(s.endsWith("c"+clientBrand))
                             return plugin.getServer().getServer((String) explicitRoutings.get(s)).orElse(null);
                     }
                 }
@@ -86,8 +91,8 @@ public class Utils {
             }
         }
         //match with only client brand
-        if(explicitRoutings.containsKey("c"+player.getClientBrand()))
-            return plugin.getServer().getServer((String) explicitRoutings.get("c"+player.getClientBrand())).orElse(null);
+        if(explicitRoutings.containsKey("c"+clientBrand))
+            return plugin.getServer().getServer((String) explicitRoutings.get("c"+clientBrand)).orElse(null);
         return null;
     }
 
@@ -98,24 +103,30 @@ public class Utils {
      */
     public @NotNull ServerPing getPingFromHandshake(@NotNull String json,
                                                                int defaultVersionProtocol,
-                                                               String defaultVersionName,
+                                                               @NotNull String defaultVersionName,
                                                                int defaultPlayersOnline,
                                                                int defaultPlayersMax,
-                                                               List<ServerPing.SamplePlayer> defaultPlayersSample,
-                                                               Component defaultDescription,
+                                                               @NotNull List<ServerPing.SamplePlayer> defaultPlayersSample,
+                                                               @NotNull Component defaultDescription,
                                                                @Nullable Favicon defaultFavicon){
+        //fields for ServerPing.Version
         int protocol = plugin.getJsonReader().getIntFromJson(json, new String[]{"version", "protocol"}).orElse(defaultVersionProtocol);
         String name = plugin.getJsonReader().getStringFromJson(json, new String[]{"version", "name"}).orElse(defaultVersionName);
+
+        //fields for ServerPing.Players
         int online = plugin.getJsonReader().getIntFromJson(json, new String[]{"players", "online"}).orElse(defaultPlayersOnline);
         int max = plugin.getJsonReader().getIntFromJson(json, new String[]{"players", "max"}).orElse(defaultPlayersMax);
         List<ServerPing.SamplePlayer> sample = plugin.getJsonReader().getJsonFromJson(json, new String[]{"players", "sample"})
                         .map(jsonArray -> new Gson().fromJson(jsonArray, ServerPing.SamplePlayer[].class))
                         .map(Arrays::asList)
                         .orElse(defaultPlayersSample);
+        //when the players field as a whole does not exist, the default values for ServerPing.Players won't be used and instead, it's set to null
+        boolean players = online != defaultPlayersOnline || max != defaultPlayersMax || sample != defaultPlayersSample;
+
         Component description = plugin.getJsonReader().getJsonFromJson(json, new String[]{"description"}).map(j -> JSONComponentSerializer.json().deserialize(j)).orElse(defaultDescription);
         Favicon favicon = plugin.getJsonReader().getStringFromJson(json, new String[]{"favicon"}).map(f -> new Favicon(f.split(",")[1])).orElse(defaultFavicon);
 
-        return new ServerPing(new ServerPing.Version(protocol, name), new ServerPing.Players(online, max, sample), description, favicon);
+        return new ServerPing(new ServerPing.Version(protocol, name), players ? new ServerPing.Players(online, max, sample) : null, description, favicon, null);
     }
 
     public @NotNull ServerPing getPingFromHandshake(@NotNull String json){
