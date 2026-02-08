@@ -71,18 +71,25 @@ jobs:
               dependencies: $dependencies,
               featured: $featured
             }')
-
-          # Upload new project version
-          curl -X POST https://api.modrinth.com/v2/version \
-            -H "Authorization: Bearer $MODRINTH_TOKEN" \
-            -F "data=$JSON_PAYLOAD;type=application/json" \
-            -F "file=@$JAR_PATH"
+          
+          RESPONSE_CODE=$(curl -s -o /dev/null -w "%{response_code}" -X GET https://api.modrinth.com/v2/project/X5ETMik1/version/$VERSION -H "Authorization: Bearer $MODRINTH_TOKEN")
+          if [ "$RESPONSE_CODE" == "404" ]; then
+            # Upload new project version
+                      curl -X POST https://api.modrinth.com/v2/version \
+                        -H "Authorization: Bearer $MODRINTH_TOKEN" \
+                        -F "data=$JSON_PAYLOAD;type=application/json" \
+                        -F "file=@$JAR_PATH"
+          else
+            echo "Version already exists on Modrinth, skipping upload"
+          fi
       - name: Update the projects description (body)
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
         run: |
-          CONTENT=$(sed "s/'/\\'/g" README.md)
+          json_body=$(jq -Rs '{body: .}' < README.md)
           
           # Update project description
           curl -X PATCH https://api.modrinth.com/v2/project/X5ETMik1 \
             -H "Authorization: Bearer $MODRINTH_TOKEN" \
             -H "Content-Type: application/json" \
-            -d '{"body":"'"$CONTENT"'"}'
+            -d $json_body
