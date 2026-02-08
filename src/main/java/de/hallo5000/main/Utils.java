@@ -6,11 +6,14 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerPing;
 import com.velocitypowered.api.util.Favicon;
+import com.velocitypowered.api.util.ModInfo;
+import jakarta.json.Json;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.io.StringReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -102,13 +105,15 @@ public class Utils {
      * @return a <code>ServerPing</code> containing every field obtainable from <code>json</code> (if not obtainable the field is replaced by the given default value)
      */
     public @NotNull ServerPing getPingFromHandshake(@NotNull String json,
-                                                               int defaultVersionProtocol,
-                                                               @NotNull String defaultVersionName,
-                                                               int defaultPlayersOnline,
-                                                               int defaultPlayersMax,
-                                                               @NotNull List<ServerPing.SamplePlayer> defaultPlayersSample,
-                                                               @NotNull Component defaultDescription,
-                                                               @Nullable Favicon defaultFavicon){
+                                                    int defaultVersionProtocol,
+                                                    @NotNull String defaultVersionName,
+                                                    int defaultPlayersOnline,
+                                                    int defaultPlayersMax,
+                                                    @NotNull List<ServerPing.SamplePlayer> defaultPlayersSample,
+                                                    @NotNull Component defaultDescription,
+                                                    @Nullable Favicon defaultFavicon,
+                                                    @NotNull String defaultModInfoType,
+                                                    @NotNull List<ModInfo.Mod> defaultModList){
         //fields for ServerPing.Version
         int protocol = plugin.getJsonReader().getIntFromJson(json, new String[]{"version", "protocol"}).orElse(defaultVersionProtocol);
         String name = plugin.getJsonReader().getStringFromJson(json, new String[]{"version", "name"}).orElse(defaultVersionName);
@@ -126,11 +131,21 @@ public class Utils {
         Component description = plugin.getJsonReader().getJsonFromJson(json, new String[]{"description"}).map(j -> JSONComponentSerializer.json().deserialize(j)).orElse(defaultDescription);
         Favicon favicon = plugin.getJsonReader().getStringFromJson(json, new String[]{"favicon"}).map(f -> new Favicon(f.split(",")[1])).orElse(defaultFavicon);
 
-        return new ServerPing(new ServerPing.Version(protocol, name), players ? new ServerPing.Players(online, max, sample) : null, description, favicon, null);
+        //fields for ModInfo
+        ModInfo modInfo = null;
+        if(plugin.getJsonReader().findKeyInJson(Json.createParser(new StringReader(json)), new String[]{"modinfo"})){
+            List<ModInfo.Mod> modList = plugin.getJsonReader().getJsonFromJson(json, new String[]{"modinfo", "modList"})
+                    .map(jsonArray -> new Gson().fromJson(jsonArray, ModInfo.Mod.class))
+                    .map(Arrays::asList)
+                    .orElse(defaultModList);
+            modInfo = new ModInfo(plugin.getJsonReader().getStringFromJson(json, new String[]{"modinfo", "type"}).orElse(defaultModInfoType), modList);
+        }
+
+        return new ServerPing(new ServerPing.Version(protocol, name), players ? new ServerPing.Players(online, max, sample) : null, description, favicon, modInfo);
     }
 
     public @NotNull ServerPing getPingFromHandshake(@NotNull String json){
-        return getPingFromHandshake(json, -1, "", -1, -1, Collections.emptyList(), Component.empty(), null);
+        return getPingFromHandshake(json, -1, "", -1, -1, Collections.emptyList(), Component.empty(), null, "FML", Collections.emptyList());
     }
 
 }

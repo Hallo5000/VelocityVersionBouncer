@@ -1,5 +1,6 @@
 package de.hallo5000.listener;
 
+import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyPingEvent;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
@@ -24,8 +25,11 @@ public class ProxyPingListener {
         RegisteredServer match = plugin.getUtils().checkForExplicitRouting(e.getConnection());
         if (match != null) {
             plugin.getLogger().info("Matches explicitly declared server: " + match.getServerInfo().getName());
-            if(plugin.getBackendPingService().getPing(match).isPresent()) e.setPing(plugin.getBackendPingService().getPing(match).get());
-            return;
+            if(plugin.getBackendPingService().getPing(match).isPresent()){
+                e.setPing(plugin.getBackendPingService().getPing(match).get());
+                e.setResult(ResultedEvent.GenericResult.allowed());
+                return;
+            }
         }
 
         //Toml Vars
@@ -50,8 +54,13 @@ public class ProxyPingListener {
                 }
             }
             plugin.getLogger().info("Matches to: " + finalServer.getServerInfo().getName());
-            if(plugin.getBackendPingService().getPing(finalServer).isPresent()) e.setPing(plugin.getBackendPingService().getPing(finalServer).get());
+            if(plugin.getBackendPingService().getPing(finalServer).isPresent()){
+                e.setPing(plugin.getBackendPingService().getPing(finalServer).get());
+                e.setResult(ResultedEvent.GenericResult.allowed());
+                return;
+            }
         }
+        if(!plugin.getToml().getBoolean("default-to-ping-passthrough")) e.setResult(ResultedEvent.GenericResult.denied());
     }
 
 }

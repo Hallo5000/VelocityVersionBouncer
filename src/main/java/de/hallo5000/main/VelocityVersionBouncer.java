@@ -20,18 +20,16 @@ import java.nio.file.Path;
 
 /*
 TODO:
-- override versions on HangarMC and Modrinth
 - fix changelog in workflows
 - ViaVersion detect
 - language files (+color code support)
 - config-version in config
-- ServerListPing modInfo
 - my own logger so that the plugins name will be show in the console instead of the id
 - timeout for pings
 */
 
 
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.4.0-release",
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.4.1-SNAPSHOT",
         url = "https://github.com/Hallo5000/VelocityVersionBouncer",
         description = "This plugin redirects players to server depending on there game version",
         authors = {"Hallo5000"})
