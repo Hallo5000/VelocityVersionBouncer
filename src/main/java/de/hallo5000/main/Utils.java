@@ -148,4 +148,40 @@ public class Utils {
         return getPingFromHandshake(json, -1, "", -1, -1, Collections.emptyList(), Component.empty(), null, "FML", Collections.emptyList());
     }
 
+    public RegisteredServer findMatchingServer(InboundConnection client){
+        RegisteredServer match = plugin.getUtils().checkForExplicitRouting(client);
+        if (match != null) {
+            plugin.getLogger().info("Found explicit routing: " + match.getServerInfo().getName());
+            return match;
+        }
+
+        //Toml Vars
+        String distribution = Optional.ofNullable(plugin.getToml().getString("distribution")).orElse("FIRST-MATCH");
+
+        //start checking
+        plugin.getLogger().info("Start checking for compatibilities (Client-Protocol: " + client.getProtocolVersion().getProtocol() + ")");
+        List<RegisteredServer> matches = new ArrayList<>(); //every server with matching protocol version
+        for(RegisteredServer s : plugin.getUtils().getConfigServerList()){
+            plugin.getLogger().info("Check " + s.getServerInfo().getName() + " with protocol " + plugin.getBackendPingService().getProtocol(s));
+            if (client.getProtocolVersion().getProtocol() == plugin.getBackendPingService().getProtocol(s).orElse(-1)) {
+                matches.add(s);
+                plugin.getLogger().info("> " + s.getServerInfo().getName() + " is compatible (Server-Protocol: " + plugin.getBackendPingService().getProtocol(s) + ")");
+            } else
+                plugin.getLogger().info("> " + s.getServerInfo().getName() + " is NOT compatible (Server-Protocol: " + plugin.getBackendPingService().getProtocol(s) + ")");
+
+        }
+        if(matches.isEmpty()){
+            plugin.getLogger().info("No server found for this client");
+            return null;
+        }else{ //needs to be changed if more than two distribution modes exist
+            RegisteredServer finalServer = matches.getFirst();
+            if(distribution.equalsIgnoreCase("BALANCED")){
+                for(RegisteredServer s : matches){
+                    if(s.getPlayersConnected().size() < finalServer.getPlayersConnected().size()) finalServer = s;
+                }
+            }
+            return finalServer;
+        }
+    }
+
 }

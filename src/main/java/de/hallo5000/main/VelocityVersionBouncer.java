@@ -59,13 +59,13 @@ public class VelocityVersionBouncer {
     public void onInitialize(ProxyInitializeEvent e) {
         toml = loadConfig();
 
-        backendPingService.start();
-
         server.getEventManager().register(this, new PlayerChooseInitialServerListener(this));
         server.getEventManager().register(this, new KickedFromServerListener(this));
         server.getEventManager().register(this, new ProxyPingListener(this));
 
         logger.info("Successfully loaded!");
+
+        backendPingService.start();
     }
 
     private Toml loadConfig() {

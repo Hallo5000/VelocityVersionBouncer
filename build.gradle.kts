@@ -21,7 +21,7 @@ repositories {
 dependencies {
     compileOnly("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
     annotationProcessor("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
-    implementation("com.moandjiezana.toml:toml4j:0.7.1")
+    implementation("com.moandjiezana.toml:toml4j:0.7.1") // moved to https://mvnrepository.com/artifact/io.hotmoka/toml4j since 0.7.3 but GitHub repo shows 0.1.7 as latest
     implementation("io.netty:netty-buffer:4.2.7.Final")
     implementation("io.netty:netty-codec:4.2.7.Final")
     implementation("io.netty:netty-transport:4.2.7.Final")

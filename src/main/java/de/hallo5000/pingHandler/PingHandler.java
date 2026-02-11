@@ -30,7 +30,7 @@ public class PingHandler {
             InetSocketAddress host = server.getServerInfo().getAddress();
             String json = null;
             try(Socket socket = new Socket()){
-                plugin.getLogger().info("Connecting to "+host.getAddress().getHostAddress()+":"+host.getPort());
+                plugin.getLogger().debug("Connecting to "+host.getAddress().getHostAddress()+":"+host.getPort());
                 socket.connect(host);
 
                 DataInputStream input = new DataInputStream(socket.getInputStream());
@@ -98,7 +98,7 @@ public class PingHandler {
             */
 
             }catch(IOException ex){
-                if(ex instanceof ConnectException) plugin.getLogger().info("Couldn't connect to " + server.getServerInfo().getName());
+                if(ex instanceof ConnectException) plugin.getLogger().debug("Couldn't connect to " + server.getServerInfo().getName());
                 else plugin.getLogger().error("Error while pinging a backend server: ", ex);
             }
             return json;
