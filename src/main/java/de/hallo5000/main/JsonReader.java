@@ -15,7 +15,7 @@ import java.util.OptionalInt;
  */
 public class JsonReader {
 
-    VelocityVersionBouncer plugin;
+    private final VelocityVersionBouncer plugin;
     public JsonReader(VelocityVersionBouncer plugin){
         this.plugin = plugin;
     }

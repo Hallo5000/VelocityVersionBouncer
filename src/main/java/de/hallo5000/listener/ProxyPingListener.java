@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public class ProxyPingListener {
 
-    VelocityVersionBouncer plugin;
+    private final VelocityVersionBouncer plugin;
     public ProxyPingListener(VelocityVersionBouncer plugin){
         this.plugin = plugin;
     }

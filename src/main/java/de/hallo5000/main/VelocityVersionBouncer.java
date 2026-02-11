@@ -12,6 +12,7 @@ import de.hallo5000.listener.PlayerChooseInitialServerListener;
 import de.hallo5000.listener.ProxyPingListener;
 import de.hallo5000.pingHandler.BackendPingService;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -24,14 +25,14 @@ TODO:
 - ViaVersion detect
 - language files (+color code support)
 - config-version in config
-- my own logger so that the plugins name will be show in the console instead of the id
+- set different log levels for each logging call
 - timeout for pings
 */
 
 
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.4.1-SNAPSHOT",
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.4.2-SNAPSHOT",
         url = "https://github.com/Hallo5000/VelocityVersionBouncer",
-        description = "This plugin redirects players to server depending on there game version",
+        description = "This plugin redirects players to servers depending on their game version",
         authors = {"Hallo5000"})
 public class VelocityVersionBouncer {
 
@@ -44,14 +45,14 @@ public class VelocityVersionBouncer {
     private Toml toml;
 
     @Inject
-    public VelocityVersionBouncer(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
+    public VelocityVersionBouncer(ProxyServer server, @SuppressWarnings("unused") Logger logger, @DataDirectory Path dataDirectory) {
         this.server = server;
-        this.logger = logger;
+        this.logger = LoggerFactory.getLogger(this.getClass().getAnnotation(Plugin.class).name());
         this.dataDirectory = dataDirectory; //.getParent().resolve(this.getClass().getAnnotation(Plugin.class).name());
 
         this.utils = new Utils(this);
         this.jsonReader = new JsonReader(this);
-        this.backendPingService = new BackendPingService(logger, this, server);
+        this.backendPingService = new BackendPingService(this.logger, this, server);
     }
 
     @Subscribe
