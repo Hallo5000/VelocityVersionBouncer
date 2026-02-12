@@ -18,7 +18,11 @@ public class PlayerChooseInitialServerListener {
 
     @Subscribe
     private void onPlayerChooseInitialServer(PlayerChooseInitialServerEvent e){
-        plugin.getLogger().info("[Initial join - VersionBouncing");
+        plugin.getLogger().info("[Initial join - VersionBouncing]");
+        plugin.getLogger().info("GameProfile: "+e.getPlayer().getGameProfileProperties());
+        plugin.getLogger().info("ModInfo: "+e.getPlayer().getModInfo());
+        plugin.getLogger().info("Version: "+e.getPlayer().getProtocolVersion().getVersionsSupportedBy());
+        plugin.getLogger().info("Clientbrand: "+e.getPlayer().getClientBrand());
         RegisteredServer s = plugin.getUtils().findMatchingServer(e.getPlayer());
         if(s != null){
             plugin.getLogger().info("Connects to: " + s.getServerInfo().getName());

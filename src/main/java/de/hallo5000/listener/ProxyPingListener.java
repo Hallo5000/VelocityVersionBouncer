@@ -28,7 +28,6 @@ public class ProxyPingListener {
                 return;
             }
         }
-        plugin.getLogger().info("No ping found for this server.");
         if(!plugin.getToml().getBoolean("default-to-ping-passthrough")) e.setResult(ResultedEvent.GenericResult.denied());
     }
 

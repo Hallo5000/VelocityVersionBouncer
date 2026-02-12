@@ -68,7 +68,7 @@ explicit-fallback-server = "lobby"
 # either a game version (v) or a protocol version (p) is necessary but client brands (c) are completely optional
 # when no client brand is defined the routing just takes every client joining with the defined game/protocol version
 [explicit-routing]
-# Example: v1-21-8cFORGE = "lobby-1"
+# Example: v1_21_8cFORGE = "lobby-1"
 # Example: p123 = "lobby-2"
 # Example: cGeyser = "GeyserMC-server"
 ```

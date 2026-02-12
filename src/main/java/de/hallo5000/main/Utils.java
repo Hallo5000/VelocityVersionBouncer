@@ -55,12 +55,12 @@ public class Utils {
         if(inboundConnection == null) return null;
         int protocol = inboundConnection.getProtocolVersion().getProtocol();
         String clientBrand = "";
-        if(inboundConnection instanceof Player p) clientBrand = p.getClientBrand();
+        if(inboundConnection instanceof Player p && p.getClientBrand() != null) clientBrand = p.getClientBrand();
         
         Map<String, Object> explicitRoutings = new LinkedHashMap<>(plugin.getToml().getTable("explicit-routing").toMap());
         //removes all invalid explicit routings
         for(String s : explicitRoutings.keySet()){
-            if(s.isEmpty() || !s.matches("^(?=[pvc])((p\\d{3})|(v1.\\d+.\\d+))?(c\\S+)?$")) explicitRoutings.remove(s);
+            if(s.isEmpty() || !s.matches("^(?=[pvc])((p\\d{3})|(v1_\\d+_\\d+))?(c\\S+)?$")) explicitRoutings.remove(s);
         }
         //removes all explicit routings with unmatching client brands
         for(String s : new HashSet<>(explicitRoutings.keySet())){
@@ -80,7 +80,7 @@ public class Utils {
             return plugin.getServer().getServer(serverName).orElse(null);
         }
         //matching game versions + optional client brand
-        for(String v : inboundConnection.getProtocolVersion().getVersionsSupportedBy()){
+        for(String v : inboundConnection.getProtocolVersion().getVersionsSupportedBy().stream().map(s -> s.replace('.', '_')).toList()){
             if(explicitRoutings.keySet().stream().anyMatch(r -> r.startsWith("v"+v))){
                 for(String s : new HashSet<>(explicitRoutings.keySet())){
                     if(s.startsWith("v")){
