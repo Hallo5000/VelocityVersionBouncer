@@ -20,13 +20,13 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17
-      - name: Create Changelog
-        run: |
-          {
-            echo "CHANGELOG<<__CHANGELOG__"
-            git log --pretty=format:'%s' ${{ github.event.before }}..${{ github.event.after }}
-            echo "__CHANGELOG__"
-          } >> "$GITHUB_ENV"
+#      - name: Create Changelog
+#        run: |
+#          {
+#            echo "CHANGELOG<<__CHANGELOG__"
+#            git log --pretty=format:'%s' ${{ github.event.before }}..${{ github.event.after }}
+#            echo "__CHANGELOG__"
+#          } >> "$GITHUB_ENV"
       - name: Publish
         env:
           HANGAR_API_TOKEN: ${{ secrets.HANGAR_API_TOKEN }}

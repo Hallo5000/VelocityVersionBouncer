@@ -23,7 +23,9 @@ jobs:
           # Get current version
           VERSION=$(./gradlew -q printVersion)
           # Create changelog
-          CHANGELOG=$(git log --pretty=format:'%s' $BEFORE_COMMIT..$AFTER_COMMIT)
+          # CHANGELOG=$(git log --pretty=format:'%s' $BEFORE_COMMIT..$AFTER_COMMIT)
+          # CHANGELOG=$(git log -1 --pretty=%B)
+          CHANGELOG=""
           
           if ! command -v jq &> /dev/null; then
             echo "jq not found!"
@@ -65,7 +67,7 @@ jobs:
               loaders: $loaders,
               game_versions: $game_versions,
               project_id: $project_id,
-              changelog: $changelog,
+              # changelog: $changelog,
               file_parts: ["file"],
               primary_file: "file",
               dependencies: $dependencies,

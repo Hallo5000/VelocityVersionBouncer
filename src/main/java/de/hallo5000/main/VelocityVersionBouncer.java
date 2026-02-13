@@ -24,9 +24,7 @@ TODO:
 - fix changelog in workflows
 - ViaVersion detect
 - language files (+color code support)
-- config-version in config
 - set different log levels for each logging call (log-level in config)
-- timeout for pings
 */
 
 

@@ -62,7 +62,7 @@ explicit-fallback-server = "lobby"
 
 # ------ explicit routing ------
 # Syntax
-#   vX.X.X - game version
+#   v1_x_x - game version
 #   p000 - protocol version (Protocol Versions for every release/snapshot can be found here: https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Protocol_version_numbers)
 #   cFORGE - Client brand (for example: vanilla, forge, fabric, Geyser (for player joining through GeyserMC), badlion, etc.
 # either a game version (v) or a protocol version (p) is necessary but client brands (c) are completely optional

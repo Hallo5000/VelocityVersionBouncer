@@ -101,7 +101,7 @@ hangarPublish {
     publications.register("plugin") {
         version.set(versionString) //originally suffixedVersion but I include 'release' or 'SNAPSHOT' in the version
         channel.set(if (isRelease) "Release" else "Snapshot")
-        changelog.set(System.getenv("CHANGELOG"))
+        //changelog.set(System.getenv("CHANGELOG"))
         id.set("VelocityVersionBouncer")
         apiKey.set(System.getenv("HANGAR_API_TOKEN"))
         platforms {
