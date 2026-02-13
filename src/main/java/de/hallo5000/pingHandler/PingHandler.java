@@ -30,13 +30,15 @@ public class PingHandler {
             InetSocketAddress host = server.getServerInfo().getAddress();
             String json = null;
             try(Socket socket = new Socket()){
-                plugin.getLogger().debug("Connecting to "+host.getAddress().getHostAddress()+":"+host.getPort());
-                socket.connect(host);
+                plugin.getLogger().info("Connecting to "+host.getAddress().getHostAddress()+":"+host.getPort());
+                socket.connect(host, Math.toIntExact(plugin.getToml().getLong("ping-intervall"))*1000);
 
                 DataInputStream input = new DataInputStream(socket.getInputStream());
                 DataOutputStream output = new DataOutputStream(socket.getOutputStream());
 
                 byte [] handshakeMessage = createHandshakeMessage(host.getAddress().getHostAddress(), host.getPort());
+
+                Thread.sleep(0); //check for interrupts
 
                 // C->S : Handshake State=1
                 // send packet length and packet
@@ -44,10 +46,14 @@ public class PingHandler {
                 output.write(handshakeMessage);
                 output.flush();
 
+                Thread.sleep(0); //check for interrupts
+
                 // C->S : Request
                 writeVarInt(output, 0x01); //size is only 1
                 output.writeByte(0x00); //packet id for "Status Request"
                 output.flush();
+
+                Thread.sleep(0); //check for interrupts
 
                 // S->C : Response
                 readVarInt(input); //packet length
@@ -76,12 +82,17 @@ public class PingHandler {
                 json = new String(in);
 
             /* Ping and Pong are optionally and not needed for this case (I'll leave the code here if needed in the future)
+
+            Thread.sleep(0); //check for interrupts
+
             // C->S : Ping
             long now = System.currentTimeMillis();
             writeVarInt(output, 0x09); //size of packet (1 for id and 8 for long)
             output.writeByte(0x01); //0x01 for ping
             output.writeLong(now); //notchian clients sent there time stamp otherwise this field ("Payload") is useless
             output.flush();
+
+            Thread.sleep(0); //check for interrupts
 
             // S->C : Pong
             readVarInt(input); //packet length
@@ -97,8 +108,9 @@ public class PingHandler {
             if(now != pingtime) plugin.getLogger().warn("Something went wrong: the Pong Response Payload wasn't the same as the previously sent timestamp.");
             */
 
-            }catch(IOException ex){
-                if(ex instanceof ConnectException) plugin.getLogger().debug("Couldn't connect to " + server.getServerInfo().getName());
+            }catch(IOException | InterruptedException ex){
+                if(ex instanceof ConnectException) plugin.getLogger().info("Couldn't connect to " + server.getServerInfo().getName());
+                else if(ex instanceof InterruptedException) plugin.getLogger().info("Timed out while trying to ping " + server.getServerInfo().getName());
                 else plugin.getLogger().error("Error while pinging a backend server: ", ex);
             }
             return json;

@@ -25,7 +25,7 @@ TODO:
 - ViaVersion detect
 - language files (+color code support)
 - config-version in config
-- set different log levels for each logging call
+- set different log levels for each logging call (log-level in config)
 - timeout for pings
 */
 
@@ -52,7 +52,7 @@ public class VelocityVersionBouncer {
 
         this.utils = new Utils(this);
         this.jsonReader = new JsonReader(this);
-        this.backendPingService = new BackendPingService(this.logger, this, server);
+        this.backendPingService = new BackendPingService(this, server);
     }
 
     @Subscribe
@@ -63,7 +63,7 @@ public class VelocityVersionBouncer {
         server.getEventManager().register(this, new KickedFromServerListener(this));
         server.getEventManager().register(this, new ProxyPingListener(this));
 
-        logger.info("Successfully loaded!");
+        logger.info("Successfully loaded!"+server.getAllServers());
 
         backendPingService.start();
     }

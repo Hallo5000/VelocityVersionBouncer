@@ -7,16 +7,15 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerPing;
 import de.hallo5000.main.VelocityVersionBouncer;
-import org.slf4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class BackendPingService {
 
-    private final Logger logger;
     private final VelocityVersionBouncer plugin;
     private final ProxyServer server;
     private final Map<RegisteredServer, Optional<ServerPing>> pingCache;
@@ -24,12 +23,10 @@ public class BackendPingService {
 
     /**
      * Initializes the internal Objects (the pingCache Map is initialized as <code>ConcurrentHashMap</code>
-     * @param logger an instance of the plugins logger
      * @param plugin an instance of the plugins main class
      * @param server the main instance of <code>ProxyServer</code>
      */
-    public BackendPingService(Logger logger, VelocityVersionBouncer plugin, ProxyServer server){
-        this.logger = logger;
+    public BackendPingService(VelocityVersionBouncer plugin, ProxyServer server){
         this.plugin = plugin;
         this.server = server;
         this.pingCache = new ConcurrentHashMap<>();
@@ -52,12 +49,17 @@ public class BackendPingService {
      * Simply calls <code>ping()</code> on every backend server contained in <code>getAllServers()</code>
      */
     public void pingAll(){
-        logger.info("Pinging every Backend Server...");
-        List<CompletableFuture<?>> futures = new ArrayList<>();
+        plugin.getLogger().info("Pinging every Backend Server...");
+        List<CompletableFuture<String>> futures = new ArrayList<>();
         for(RegisteredServer s : server.getAllServers()){
             futures.add(ping(s));
         }
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).whenComplete((v, e) -> logger.info("Pings complete!"));
+        server.getScheduler().buildTask(plugin, () -> {
+            for(CompletableFuture<String> f : futures){
+                f.cancel(true);
+            }
+        }).delay(plugin.getToml().getLong("ping-intervall"), TimeUnit.SECONDS).schedule();
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).whenComplete((v, e) -> plugin.getLogger().info("Pings complete!"));
     }
 
     /**
@@ -66,18 +68,18 @@ public class BackendPingService {
      * @return a CompletableFuture with the ping response
      * @throws NullPointerException if the given <code>RegisteredServer</code> is null
      */
-    public CompletableFuture<?> ping(RegisteredServer server){
+    public CompletableFuture<String> ping(RegisteredServer server){
         return pingHandler.ping(server).whenComplete((json, error) -> {
-            if(error != null) plugin.getLogger().error("while pinging: ", error);
+            if(error != null && !(error instanceof CancellationException)) plugin.getLogger().error("while pinging: ", error);
             if(json != null){
                 pingCache.put(server, Optional.of(plugin.getUtils().getPingFromHandshake(json)));
                 if(getProtocol(server).isPresent()){
-                    logger.info("Ping SUCCESSFUL for " + server.getServerInfo().getName() + " - protocol version number: " + getProtocol(server));
+                    plugin.getLogger().info("Ping SUCCESSFUL for " + server.getServerInfo().getName() + " - protocol version number: " + getProtocol(server).getAsInt());
                     return;
                 }
             }
-            if(!pingCache.containsKey(server)) pingCache.put(server, Optional.empty());
-            logger.info("Ping FAILED for " + server.getServerInfo().getName());
+            pingCache.put(server, Optional.empty());
+            plugin.getLogger().info("Ping FAILED for " + server.getServerInfo().getName());
         });
     }
 
@@ -101,7 +103,7 @@ public class BackendPingService {
 
     @Subscribe
     public void onServerRegistered(ServerRegisteredEvent e){
-        logger.info("New server registered. Pinging...");
+        plugin.getLogger().info("New server registered. Pinging...");
         ping(e.registeredServer());
     }
 

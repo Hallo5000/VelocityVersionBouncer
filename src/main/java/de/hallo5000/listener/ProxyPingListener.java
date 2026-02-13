@@ -17,6 +17,9 @@ public class ProxyPingListener {
     public void onProxyPing(ProxyPingEvent e){
         if(!plugin.getToml().getBoolean("server-list-ping")) return;
 
+        if(!plugin.getToml().getBoolean("default-to-ping-passthrough")) e.setResult(ResultedEvent.GenericResult.denied());
+        if(e.getConnection().getProtocolVersion().getProtocol() == -2) return; //legacy ping (most likely because the client got no response in a previous attempt)
+
         plugin.getLogger().info("Server List Ping incoming...");
 
         RegisteredServer s = plugin.getUtils().findMatchingServer(e.getConnection());
@@ -25,10 +28,8 @@ public class ProxyPingListener {
                 plugin.getLogger().info("Send ping response: " + s.getServerInfo().getName());
                 e.setPing(plugin.getBackendPingService().getPing(s).get());
                 e.setResult(ResultedEvent.GenericResult.allowed());
-                return;
             }
         }
-        if(!plugin.getToml().getBoolean("default-to-ping-passthrough")) e.setResult(ResultedEvent.GenericResult.denied());
     }
 
 }

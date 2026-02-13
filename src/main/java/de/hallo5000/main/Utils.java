@@ -66,36 +66,29 @@ public class Utils {
         for(String s : new HashSet<>(explicitRoutings.keySet())){
             if(s.contains("c") && !s.endsWith("c"+clientBrand)) explicitRoutings.remove(s);
         }
-        //matching protocol version + optional client brand
-        if(explicitRoutings.keySet().stream().anyMatch(r -> r.startsWith("p"+protocol))) {
-            //at this point there is at least one match for the protocol version number
-            for(String s : new HashSet<>(explicitRoutings.keySet())){
-                if(s.startsWith("p")){
-                    if(!s.startsWith("p"+protocol)) explicitRoutings.remove(s);
-                    else if(s.endsWith("c"+clientBrand))
-                        return plugin.getServer().getServer((String) explicitRoutings.get(s)).orElse(null);
-                }
-            }
-            String serverName = (String) explicitRoutings.get("p" + protocol);
-            return plugin.getServer().getServer(serverName).orElse(null);
-        }
-        //matching game versions + optional client brand
+
+        //matching protocol version + client brand
+        String serverName = (String) explicitRoutings.get("p"+protocol+"c"+clientBrand);
+        if(serverName != null) return plugin.getServer().getServer(serverName).orElse(null);
+        //matching protocol version without client brand
+        serverName = (String) explicitRoutings.get("p"+protocol+"c"+clientBrand);
+        if(serverName != null) return plugin.getServer().getServer(serverName).orElse(null);
+
+        //matching game versions + client brand
         for(String v : inboundConnection.getProtocolVersion().getVersionsSupportedBy().stream().map(s -> s.replace('.', '_')).toList()){
-            if(explicitRoutings.keySet().stream().anyMatch(r -> r.startsWith("v"+v))){
-                for(String s : new HashSet<>(explicitRoutings.keySet())){
-                    if(s.startsWith("v")){
-                        if(!s.startsWith("v"+v)) explicitRoutings.remove(s);
-                        else if(s.endsWith("c"+clientBrand))
-                            return plugin.getServer().getServer((String) explicitRoutings.get(s)).orElse(null);
-                    }
-                }
-                String serverName = (String) explicitRoutings.get("v"+v);
-                return plugin.getServer().getServer(serverName).orElse(null);
-            }
+                serverName = (String) explicitRoutings.get("v"+v+"c"+clientBrand);
+                if(serverName != null) return plugin.getServer().getServer(serverName).orElse(null);
         }
+        //matching game versions without client brand
+        for(String v : inboundConnection.getProtocolVersion().getVersionsSupportedBy().stream().map(s -> s.replace('.', '_')).toList()){
+            serverName = (String) explicitRoutings.get("v"+v);
+            if(serverName != null) return plugin.getServer().getServer(serverName).orElse(null);
+        }
+
         //match with only client brand
         if(explicitRoutings.containsKey("c"+clientBrand))
             return plugin.getServer().getServer((String) explicitRoutings.get("c"+clientBrand)).orElse(null);
+
         return null;
     }
 
@@ -150,7 +143,7 @@ public class Utils {
 
     public RegisteredServer findMatchingServer(InboundConnection client){
         RegisteredServer match = plugin.getUtils().checkForExplicitRouting(client);
-        if (match != null) {
+        if(match != null) {
             plugin.getLogger().info("Found explicit routing: " + match.getServerInfo().getName());
             return match;
         }
@@ -162,13 +155,15 @@ public class Utils {
         plugin.getLogger().info("Start checking for compatibilities (Client-Protocol: " + client.getProtocolVersion().getProtocol() + ")");
         List<RegisteredServer> matches = new ArrayList<>(); //every server with matching protocol version
         for(RegisteredServer s : plugin.getUtils().getConfigServerList()){
-            plugin.getLogger().info("Check " + s.getServerInfo().getName() + " with protocol " + plugin.getBackendPingService().getProtocol(s));
-            if (client.getProtocolVersion().getProtocol() == plugin.getBackendPingService().getProtocol(s).orElse(-1)) {
+            if(plugin.getBackendPingService().getProtocol(s).isEmpty()){
+                plugin.getLogger().info("> " + s.getServerInfo().getName() + " is unavailable");
+                continue;
+            }
+            if(client.getProtocolVersion().getProtocol() == plugin.getBackendPingService().getProtocol(s).getAsInt()){
                 matches.add(s);
-                plugin.getLogger().info("> " + s.getServerInfo().getName() + " is compatible (Server-Protocol: " + plugin.getBackendPingService().getProtocol(s) + ")");
-            } else
-                plugin.getLogger().info("> " + s.getServerInfo().getName() + " is NOT compatible (Server-Protocol: " + plugin.getBackendPingService().getProtocol(s) + ")");
-
+                plugin.getLogger().info("> " + s.getServerInfo().getName() + " is compatible (Server-Protocol: " + plugin.getBackendPingService().getProtocol(s).getAsInt() + ")");
+            }else
+                plugin.getLogger().info("> " + s.getServerInfo().getName() + " is NOT compatible (Server-Protocol: " + plugin.getBackendPingService().getProtocol(s).getAsInt() + ")");
         }
         if(matches.isEmpty()){
             plugin.getLogger().info("No server found for this client");
