@@ -19,7 +19,7 @@ public class PlayerChooseInitialServerListener {
     @Subscribe
     private void onPlayerChooseInitialServer(PlayerChooseInitialServerEvent e){
         plugin.getLogger().info("[Initial join - VersionBouncing]");
-        RegisteredServer s = plugin.getUtils().findMatchingServer(e.getPlayer());
+        RegisteredServer s = plugin.getUtils().findMatchingServer(e.getPlayer(), null);
         if(s != null){
             plugin.getLogger().info("Connects to: " + s.getServerInfo().getName());
             e.setInitialServer(s);

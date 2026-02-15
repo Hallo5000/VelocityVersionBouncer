@@ -38,11 +38,11 @@ public class BackendPingService {
      * Should only be used once per Plugin initialization.
      */
     public void start(){
+        server.getEventManager().register(plugin, this);
         server.getScheduler()
                 .buildTask(plugin, this::pingAll)
                 .repeat(plugin.getToml().getLong("ping-intervall"), TimeUnit.SECONDS)
                 .schedule();
-        server.getEventManager().register(plugin, this);
     }
 
     /**
@@ -54,7 +54,7 @@ public class BackendPingService {
         for(RegisteredServer s : server.getAllServers()){
             futures.add(ping(s));
         }
-        server.getScheduler().buildTask(plugin, () -> {
+        server.getScheduler().buildTask(plugin, () -> { //timeout
             for(CompletableFuture<String> f : futures){
                 f.cancel(true);
             }
@@ -69,17 +69,18 @@ public class BackendPingService {
      * @throws NullPointerException if the given <code>RegisteredServer</code> is null
      */
     public CompletableFuture<String> ping(RegisteredServer server){
-        return pingHandler.ping(server).whenComplete((json, error) -> {
+        return pingHandler.ping(server).handle((json, error) -> {
             if(error != null && !(error instanceof CancellationException)) plugin.getLogger().error("while pinging: ", error);
             if(json != null){
                 pingCache.put(server, Optional.of(plugin.getUtils().getPingFromHandshake(json)));
                 if(getProtocol(server).isPresent()){
                     plugin.getLogger().info("Ping SUCCESSFUL for " + server.getServerInfo().getName() + " - protocol version number: " + getProtocol(server).getAsInt());
-                    return;
+                    return json;
                 }
             }
-            pingCache.put(server, Optional.empty());
+            pingCache.remove(server);
             plugin.getLogger().info("Ping FAILED for " + server.getServerInfo().getName());
+            return json;
         });
     }
 
@@ -98,7 +99,7 @@ public class BackendPingService {
      * @return an <code>Optional<ServerPing></code> containing the servers ping response or empty if there was none the last time the server was pinged
      */
     public Optional<ServerPing> getPing(RegisteredServer server){
-        return pingCache.get(server);
+        return pingCache.getOrDefault(server, Optional.empty());
     }
 
     @Subscribe

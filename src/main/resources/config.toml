@@ -23,6 +23,7 @@ server-list-ping = false
 # This option determines wether to use velocities ping-passthrough when no matching server was found for the ping response
 # If set to true, things like the description will probably show but the client shows that the version doesn't match,
 # otherwise the client will display "Can't connect to server"
+# This option will also be ignored if 'server-list-ping' is set to false
 default-to-ping-passthrough = true
 
 # This defines how often all backend servers get pinged to refresh infos in the plugins ping cache

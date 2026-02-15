@@ -28,7 +28,7 @@ TODO:
 */
 
 
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.4.2-SNAPSHOT",
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.4.3-SNAPSHOT",
         url = "https://github.com/Hallo5000/VelocityVersionBouncer",
         description = "This plugin redirects players to servers depending on their game version",
         authors = {"Hallo5000"})
@@ -61,7 +61,7 @@ public class VelocityVersionBouncer {
         server.getEventManager().register(this, new KickedFromServerListener(this));
         server.getEventManager().register(this, new ProxyPingListener(this));
 
-        logger.info("Successfully loaded!"+server.getAllServers());
+        logger.info("Successfully loaded!");
 
         backendPingService.start();
     }

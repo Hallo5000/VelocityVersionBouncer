@@ -94,8 +94,8 @@ public class Utils {
 
     /**
      * Takes in a JSON Payload from the Status Response packet in a Server List Ping
-     * @param json the JSON response field (can be obtained by <code>PingHandler.ping();</code>
-     * @return a <code>ServerPing</code> containing every field obtainable from <code>json</code> (if not obtainable the field is replaced by the given default value)
+     * @param json the JSON response field (can be obtained by {@link de.hallo5000.pingHandler.PingHandler#ping(RegisteredServer)  ping()})
+     * @return a <code>ServerPing</code> containing every field obtainable from <code>json</code> (if not obtainable the field is set to the given default value)
      */
     public @NotNull ServerPing getPingFromHandshake(@NotNull String json,
                                                     int defaultVersionProtocol,
@@ -137,24 +137,37 @@ public class Utils {
         return new ServerPing(new ServerPing.Version(protocol, name), players ? new ServerPing.Players(online, max, sample) : null, description, favicon, modInfo);
     }
 
+    /**
+     * {@link #getPingFromHandshake(String, int, String, int, int, List, Component, Favicon, String, List) getPingFromHandshake()} but with pre-set defaults
+     * @param json the json string to parse the <code>ServerPing</code> from
+     * @return a server ping derived from the json string
+     */
     public @NotNull ServerPing getPingFromHandshake(@NotNull String json){
         return getPingFromHandshake(json, -1, "", -1, -1, Collections.emptyList(), Component.empty(), null, "FML", Collections.emptyList());
     }
 
-    public RegisteredServer findMatchingServer(InboundConnection client){
+    /**
+     * First checks if there is an explicit routing in the config with a matching protocol/game version and/or client brand.
+     * When there is no explicit routing it checks every server specified by whitelist and blacklist. The first server found by this method will be returned.
+     * @param client player to find a matching server for
+     * @return a server with matching protocol version
+     */
+    public @Nullable RegisteredServer findMatchingServer(InboundConnection client, RegisteredServer serverToExclude){
+        if(client == null) return null;
         RegisteredServer match = plugin.getUtils().checkForExplicitRouting(client);
         if(match != null) {
             plugin.getLogger().info("Found explicit routing: " + match.getServerInfo().getName());
             return match;
         }
 
-        //Toml Vars
-        String distribution = Optional.ofNullable(plugin.getToml().getString("distribution")).orElse("FIRST-MATCH");
-
         //start checking
         plugin.getLogger().info("Start checking for compatibilities (Client-Protocol: " + client.getProtocolVersion().getProtocol() + ")");
         List<RegisteredServer> matches = new ArrayList<>(); //every server with matching protocol version
         for(RegisteredServer s : plugin.getUtils().getConfigServerList()){
+            if(serverToExclude != null && s == serverToExclude){
+                plugin.getLogger().info("> " + s.getServerInfo().getName() + " is excluded");
+                continue;
+            }
             if(plugin.getBackendPingService().getProtocol(s).isEmpty()){
                 plugin.getLogger().info("> " + s.getServerInfo().getName() + " is unavailable");
                 continue;
@@ -168,9 +181,9 @@ public class Utils {
         if(matches.isEmpty()){
             plugin.getLogger().info("No server found for this client");
             return null;
-        }else{ //needs to be changed if more than two distribution modes exist
+        }else{ //needs to be changed if more than two distribution modes are implemented
             RegisteredServer finalServer = matches.getFirst();
-            if(distribution.equalsIgnoreCase("BALANCED")){
+            if("BALANCED".equalsIgnoreCase(plugin.getToml().getString("distribution"))){
                 for(RegisteredServer s : matches){
                     if(s.getPlayersConnected().size() < finalServer.getPlayersConnected().size()) finalServer = s;
                 }

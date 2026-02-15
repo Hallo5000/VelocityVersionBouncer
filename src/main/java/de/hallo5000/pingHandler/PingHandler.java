@@ -25,7 +25,7 @@ public class PingHandler {
      * @param server a backend server from the proxy this is called on
      * @return a <code>CompletableFuture</code> containing the JSON Response by the backend server containing the server information, which might be incomplete/invalid json
      */
-    protected CompletableFuture<String> ping(RegisteredServer server){
+    public CompletableFuture<String> ping(RegisteredServer server){
         return CompletableFuture.supplyAsync(() -> {
             InetSocketAddress host = server.getServerInfo().getAddress();
             String json = null;

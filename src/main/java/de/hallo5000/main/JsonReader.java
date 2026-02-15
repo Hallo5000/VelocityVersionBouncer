@@ -20,6 +20,12 @@ public class JsonReader {
         this.plugin = plugin;
     }
 
+    /**
+     * Moves the parser according to the path array.
+     * @param parser a <code>JsonParser</code> with the string to scan
+     * @param path the path to find
+     * @return whether or no the json string from the parser contains the value at path
+     */
     public boolean findKeyInJson(JsonParser parser, String[] path){
         if(path == null || path.length == 0) return false;
         int next_i = 0;
@@ -48,6 +54,10 @@ public class JsonReader {
         return false;
     }
 
+    /**
+     * When the parser is at the start of a json object/array this method moves the parser to the end of it
+     * @param parser the <code>JsonParser</code> to operate
+     */
     private void skipElement(JsonParser parser){
         JsonParser.Event event = parser.currentEvent();
         if(event != JsonParser.Event.START_OBJECT
@@ -83,6 +93,12 @@ public class JsonReader {
         return Optional.empty();
     }
 
+    /**
+     * Goes to the key specified by <code>path</code> and returns an <code>Optional</code> possibly containing a json object
+     * @param json the json string to search the path in
+     * @param path the path in the json string to find the json object at
+     * @return an <code>Optional</code> containing the json object or <code>Optional.empty()</code> if no json object was found
+     */
     public Optional<String> getJsonFromJson(String json, String[] path){
         if(json == null) return Optional.empty();
         try(JsonParser parser = Json.createParser(new StringReader(json))){
@@ -99,6 +115,11 @@ public class JsonReader {
         return Optional.empty();
     }
 
+    /**
+     * Builds a string containing the json object the <code>JsonParser</code> is at
+     * @param builder the <code>StringBuilder</code> to build the json string with
+     * @param parser the <code>JsonParser</code> to get the json object from
+     */
     private void buildJson(StringBuilder builder, JsonParser parser){
         JsonParser.Event event = parser.currentEvent();
         if(event == JsonParser.Event.START_OBJECT) builder.append("{");
