@@ -15,7 +15,7 @@
 - **What happens if no compatible server is found?** The client will simply be disconnected with the according note/reason.
 - **Does this work with modded minecraft servers?** If you're using setups like Ambassador+ProxyCompatibleForge [(more information)](https://docs.papermc.io/velocity/server-compatibility) this plugin will route the client based purely on their protocol version (game version), not their installed mods. _Note: This setup has only been tested with PaperMC and (Neo)Forge servers._
 ### 📦 Installation & 🛠️ Requirements
-1. Download the `.jar` file of the last stable release ([here](https://github.com/Hallo5000/VelocityVersionBouncer/blob/master/build/libs/VelocityVersionBouncer-1.4.0-release.jar)) or build it yourself (the gradle files are included).
+1. Download the `.jar` file of the last stable release ([here](https://github.com/Hallo5000/VelocityVersionBouncer/blob/master/build/libs/VelocityVersionBouncer-1.5.0-release.jar)) or build it yourself (the gradle files are included).
 2. Put the file in your servers `plugins/` folder (only the proxy!) and restart the server once to generate the config file.
 3. When you're finished editing the config restart the proxy once more and everything should be working.
 _Note: this plugin may not work properly if you are not running on `Java 21` (or higher) and `Velocity 3.4.0` or above_
@@ -45,6 +45,11 @@ distribution = "FIRST-MATCH"
 # instead when a client sends a server ping it will use the same algorithm to determine a matching server as in the joining/fallback process
 # be carefully when also using clientbrands in the explicit routings as these can't be used to match server pings
 server-list-ping = false
+# This option determines wether to use velocities ping-passthrough when no matching server was found for the ping response
+# If set to true, things like the description will probably show but the client shows that the version doesn't match,
+# otherwise the client will display "Can't connect to server"
+# This option will also be ignored if 'server-list-ping' is set to false
+default-to-ping-passthrough = true
 
 # This defines how often all backend servers get pinged to refresh infos in the plugins ping cache
 # in seconds

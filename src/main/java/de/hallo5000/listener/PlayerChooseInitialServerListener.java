@@ -1,8 +1,8 @@
 package de.hallo5000.listener;
 
+import com.velocitypowered.api.event.Continuation;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
 import de.hallo5000.main.VelocityVersionBouncer;
 import net.kyori.adventure.text.Component;
 
@@ -17,12 +17,16 @@ public class PlayerChooseInitialServerListener {
     }
 
     @Subscribe
-    private void onPlayerChooseInitialServer(PlayerChooseInitialServerEvent e){
+    public void onPlayerChooseInitialServer(PlayerChooseInitialServerEvent e, Continuation continuation){
         plugin.getLogger().info("[Initial join - VersionBouncing]");
-        RegisteredServer s = plugin.getUtils().findMatchingServer(e.getPlayer(), null);
-        if(s != null){
-            plugin.getLogger().info("Connects to: " + s.getServerInfo().getName());
-            e.setInitialServer(s);
-        }else e.getPlayer().disconnect(Component.text("Disconnected: There is no server with a matching game version available!"));
+        plugin.getUtils().findMatchingServer(e.getPlayer(), null)
+                .whenComplete((s, t) -> {
+                    if(s != null){
+                        plugin.getLogger().info("Connects to: " + s.getServerInfo().getName());
+                        e.setInitialServer(s);
+                    }else e.getPlayer().disconnect(Component.text("Disconnected: There is no server with a matching game version available!"));
+                    if(t != null) continuation.resumeWithException(t);
+                    else continuation.resume();
+                });
     }
 }

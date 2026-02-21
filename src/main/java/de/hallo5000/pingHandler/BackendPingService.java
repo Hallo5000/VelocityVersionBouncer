@@ -102,6 +102,14 @@ public class BackendPingService {
         return pingCache.getOrDefault(server, Optional.empty());
     }
 
+    public Map<RegisteredServer, Optional<ServerPing>> getPingCache() {
+        return pingCache;
+    }
+
+    public void removePing(RegisteredServer server){
+        pingCache.remove(server);
+    }
+
     @Subscribe
     public void onServerRegistered(ServerRegisteredEvent e){
         plugin.getLogger().info("New server registered. Pinging...");

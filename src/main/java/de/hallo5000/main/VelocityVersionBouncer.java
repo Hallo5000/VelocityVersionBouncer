@@ -28,7 +28,7 @@ TODO:
 */
 
 
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.4.3-SNAPSHOT",
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.5.0-release",
         url = "https://github.com/Hallo5000/VelocityVersionBouncer",
         description = "This plugin redirects players to servers depending on their game version",
         authors = {"Hallo5000"})

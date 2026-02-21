@@ -30,7 +30,6 @@ public class PingHandler {
             InetSocketAddress host = server.getServerInfo().getAddress();
             String json = null;
             try(Socket socket = new Socket()){
-                plugin.getLogger().info("Connecting to "+host.getAddress().getHostAddress()+":"+host.getPort());
                 socket.connect(host, Math.toIntExact(plugin.getToml().getLong("ping-intervall"))*1000);
 
                 DataInputStream input = new DataInputStream(socket.getInputStream());
@@ -109,9 +108,8 @@ public class PingHandler {
             */
 
             }catch(IOException | InterruptedException ex){
-                if(ex instanceof ConnectException) plugin.getLogger().info("Couldn't connect to " + server.getServerInfo().getName());
-                else if(ex instanceof InterruptedException) plugin.getLogger().info("Timed out while trying to ping " + server.getServerInfo().getName());
-                else plugin.getLogger().error("Error while pinging a backend server: ", ex);
+                if(ex instanceof InterruptedException) plugin.getLogger().info("Timed out while pinging " + server.getServerInfo().getName());
+                else if(!(ex instanceof ConnectException)) plugin.getLogger().error("Error while pinging a backend server: ", ex);
             }
             return json;
         });

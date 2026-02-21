@@ -7,14 +7,18 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerPing;
 import com.velocitypowered.api.util.Favicon;
 import com.velocitypowered.api.util.ModInfo;
+import de.hallo5000.pingHandler.PingHandler;
 import jakarta.json.Json;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.io.StringReader;
+import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class Utils {
@@ -94,7 +98,7 @@ public class Utils {
 
     /**
      * Takes in a JSON Payload from the Status Response packet in a Server List Ping
-     * @param json the JSON response field (can be obtained by {@link de.hallo5000.pingHandler.PingHandler#ping(RegisteredServer)  ping()})
+     * @param json the JSON response field (can be obtained by {@link PingHandler#ping(RegisteredServer)  ping()})
      * @return a <code>ServerPing</code> containing every field obtainable from <code>json</code> (if not obtainable the field is set to the given default value)
      */
     public @NotNull ServerPing getPingFromHandshake(@NotNull String json,
@@ -150,46 +154,76 @@ public class Utils {
      * First checks if there is an explicit routing in the config with a matching protocol/game version and/or client brand.
      * When there is no explicit routing it checks every server specified by whitelist and blacklist. The first server found by this method will be returned.
      * @param client player to find a matching server for
-     * @return a server with matching protocol version
+     * @param serverToExclude <code>RegisteredServer</code> to be excluded from checking (could be <code>null</code> to exclude none)
+     * @return a server with matching protocol version (the <code>RegisteredServer</code> inside the <code>CompletableFuture</code> can be <code>null</code> if no server was found or <code>client</code> is <code>null</code>)
      */
-    public @Nullable RegisteredServer findMatchingServer(InboundConnection client, RegisteredServer serverToExclude){
-        if(client == null) return null;
+    public @NotNull CompletableFuture<RegisteredServer> findMatchingServer(@Nullable InboundConnection client, @Nullable RegisteredServer serverToExclude){
+        if(client == null) return CompletableFuture.completedFuture(null);
         RegisteredServer match = plugin.getUtils().checkForExplicitRouting(client);
         if(match != null) {
             plugin.getLogger().info("Found explicit routing: " + match.getServerInfo().getName());
-            return match;
+            return CompletableFuture.completedFuture(match);
         }
 
         //start checking
         plugin.getLogger().info("Start checking for compatibilities (Client-Protocol: " + client.getProtocolVersion().getProtocol() + ")");
         List<RegisteredServer> matches = new ArrayList<>(); //every server with matching protocol version
-        for(RegisteredServer s : plugin.getUtils().getConfigServerList()){
-            if(serverToExclude != null && s == serverToExclude){
-                plugin.getLogger().info("> " + s.getServerInfo().getName() + " is excluded");
-                continue;
-            }
-            if(plugin.getBackendPingService().getProtocol(s).isEmpty()){
-                plugin.getLogger().info("> " + s.getServerInfo().getName() + " is unavailable");
-                continue;
-            }
-            if(client.getProtocolVersion().getProtocol() == plugin.getBackendPingService().getProtocol(s).getAsInt()){
-                matches.add(s);
-                plugin.getLogger().info("> " + s.getServerInfo().getName() + " is compatible (Server-Protocol: " + plugin.getBackendPingService().getProtocol(s).getAsInt() + ")");
-            }else
-                plugin.getLogger().info("> " + s.getServerInfo().getName() + " is NOT compatible (Server-Protocol: " + plugin.getBackendPingService().getProtocol(s).getAsInt() + ")");
+        List<RegisteredServer> servers = plugin.getUtils().getConfigServerList();
+        List<RegisteredServer> offlineServers = new ArrayList<>(servers);
+        offlineServers.removeAll(plugin.getBackendPingService().getPingCache().keySet());
+        //check if offline servers are still offline
+        List<CompletableFuture<String>> futures = new ArrayList<>();
+        for(RegisteredServer s : offlineServers){
+            futures.add(CompletableFuture.supplyAsync(() -> {
+                try(Socket socket = new Socket()){
+                    socket.connect(s.getServerInfo().getAddress(), 1000);
+                    return true;
+                }catch(IOException ex){
+                    return false;
+                }
+            }).thenCompose((reachable) -> {
+                if(reachable) return plugin.getBackendPingService().ping(s);
+                return CompletableFuture.completedFuture(null);
+            }));
         }
-        if(matches.isEmpty()){
-            plugin.getLogger().info("No server found for this client");
-            return null;
-        }else{ //needs to be changed if more than two distribution modes are implemented
-            RegisteredServer finalServer = matches.getFirst();
-            if("BALANCED".equalsIgnoreCase(plugin.getToml().getString("distribution"))){
-                for(RegisteredServer s : matches){
-                    if(s.getPlayersConnected().size() < finalServer.getPlayersConnected().size()) finalServer = s;
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).handle((v, t) -> v)
+                .thenApply((v) -> {
+            //start checking servers for matches
+            for(RegisteredServer s : servers){
+                if(serverToExclude != null && s == serverToExclude){
+                    plugin.getLogger().info("> " + s.getServerInfo().getName() + " is excluded");
+                }else if(plugin.getBackendPingService().getProtocol(s).isEmpty()){
+                    plugin.getLogger().info("> " + s.getServerInfo().getName() + " is unavailable");
+                }else if(client.getProtocolVersion().getProtocol() == plugin.getBackendPingService().getProtocol(s).getAsInt()){
+                    matches.add(s);
+                    plugin.getLogger().info("> " + s.getServerInfo().getName() + " is compatible (Server-Protocol: " + plugin.getBackendPingService().getProtocol(s).getAsInt() + ")");
+                }else
+                    plugin.getLogger().info("> " + s.getServerInfo().getName() + " is NOT compatible (Server-Protocol: " + plugin.getBackendPingService().getProtocol(s).getAsInt() + ")");
+            }
+            if(matches.isEmpty()){
+                plugin.getLogger().info("No server found for this client");
+                return null;
+            }
+            while(!matches.isEmpty()){
+                //needs to be changed if more than two distribution modes are implemented
+                RegisteredServer finalServer = matches.getFirst();
+                if("BALANCED".equalsIgnoreCase(plugin.getToml().getString("distribution"))){
+                    for(RegisteredServer s : matches){
+                        if(s.getPlayersConnected().size() < finalServer.getPlayersConnected().size()) finalServer = s;
+                    }
+                }
+                try(Socket socket = new Socket()){
+                    socket.connect(finalServer.getServerInfo().getAddress(), 1000);
+                    return finalServer;
+                }catch(IOException ex){
+                    plugin.getLogger().info("Matching server is unreachable, trying again...");
+                    plugin.getBackendPingService().removePing(finalServer);
+                    matches.remove(finalServer);
                 }
             }
-            return finalServer;
-        }
+            plugin.getLogger().info("No server found for this client");
+            return null;
+        });
     }
 
 }
