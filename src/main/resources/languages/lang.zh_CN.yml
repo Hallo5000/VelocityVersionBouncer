@@ -1,0 +1,41 @@
+successfully-loaded: "加载成功! "
+cant-create-folder: "无法创建插件文件夹, 可能是由于权限不足. "
+config-load-error: "无法加载 config.toml 文件 - 请检查错误: {0}"
+
+fallback-bouncing: "[ 备用服务器 - 跳转中 ]"
+connecting: "正在连接到: {0}"
+no-matching-server-args: "{0}\n且没有游戏版本匹配的后端服务器可用. "
+no-matching-server: "没有游戏版本匹配的后端服务器可用. "
+fallback-server-unavailable: "后端服务器当前不可用. "
+fallback-server-unavailable-console: "后端服务器似乎已离线, 因此 {0} 已被踢出服务器！"
+
+initial-join: "[ 游戏加入 - 跳转中 ]"
+no-matching-server-player: "断开连接: 没有游戏版本匹配的服务器可用！"
+
+ping-incoming: "收到服务器列表 Ping 请求..."
+ping-send: "发送 Ping 响应: {0}"
+no-server-ping: "未找到 {0} 的服务器 Ping 信息"
+
+error-json: "尝试从另一个 JSON 字符串读取 JSON 对象时发生错误: {0}"
+
+cant-found: "找不到 '{0}' ！"
+start-checking: "开始检查兼容性 (客户端协议: {0})"
+server-excluded: "> {0} 已被排除"
+server-unavailable: "> {0} 不可用"
+server-compatible: "> {0} 兼容 (服务器协议: {1})"
+server-not-compatible: "> {0} 不兼容 (服务器协议: {1})"
+no-server-found: "未找到适合此客户端的服务器"
+server-unreachable: "匹配的服务器无法访问, 正在重试..."
+
+ping-all: "正在 Ping 所有后端服务器..."
+ping-complete: "Ping 完成！"
+ping-error: "Ping 时出错: {0}"
+ping-successful: "Ping {0} 成功 - 协议版本号: {1}"
+ping-failed: "Ping {0} 失败"
+ping-new: "已注册新服务器. 正在 Ping..."
+
+premature-end-of-stream: "流提前结束. "
+packet0x00: "无效的数据包 ID"
+length0: "无效的字符串长度. "
+timeout: "Ping {0} 超时"
+error: "Ping 后端服务器时出错: {0}"

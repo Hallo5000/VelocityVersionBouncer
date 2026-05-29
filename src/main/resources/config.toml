@@ -1,5 +1,8 @@
 # This config is used to determine how and if servers are checked for their protocol versions whenever a client tries to connect to a backend server (and optionally if they lost connection)
 
+# en_US zh_CN
+language = "en_US"
+
 # 'whitelist' is a string array of server names to check for their protocol version when a client tries to connect.
 # leaving this empty is equal to putting all registered servers in
 # Example: ["server1", "server2"]

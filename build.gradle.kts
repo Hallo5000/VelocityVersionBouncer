@@ -8,13 +8,17 @@ plugins {
 }
 
 group = "de.hallo5000"
-version = "1.5.0-release"
+version = "1.5.1-beta1"
 
 repositories {
     mavenCentral()
     maven {
         name = "papermc"
         url = uri("https://repo.papermc.io/repository/maven-public/")
+    }
+    maven {
+        name = "minebench-repo"
+        url = uri("https://repo.minebench.de/")
     }
 }
 
@@ -27,6 +31,7 @@ dependencies {
     implementation("io.netty:netty-transport:4.2.7.Final")
     implementation("jakarta.json:jakarta.json-api:2.1.3")
     implementation("org.eclipse.parsson:jakarta.json:1.1.7")
+    implementation("de.themoep.utils:lang-velocity:1.3-SNAPSHOT")
 }
 
 java {

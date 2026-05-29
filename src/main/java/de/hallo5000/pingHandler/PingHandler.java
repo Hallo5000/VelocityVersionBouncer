@@ -59,21 +59,21 @@ public class PingHandler {
                 int packetId = readVarInt(input);
 
                 if (packetId == -1) {
-                    throw new IOException("Premature end of stream.");
+                    throw new IOException(plugin.getMessage("premature-end-of-stream"));
                 }
 
                 if (packetId != 0x00) { //we want a status response
-                    throw new IOException("Invalid packetID");
+                    throw new IOException(plugin.getMessage("packet0x00"));
                 }
 
                 int length = readVarInt(input); //length of json string (strings have their length prepended in addition to the packet length)
 
                 if (length == -1) {
-                    throw new IOException("Premature end of stream.");
+                    throw new IOException(plugin.getMessage("premature-end-of-stream"));
                 }
 
                 if (length == 0) {
-                    throw new IOException("Invalid string length.");
+                    throw new IOException(plugin.getMessage("length0"));
                 }
 
                 byte[] in = new byte[length];
@@ -108,8 +108,10 @@ public class PingHandler {
             */
 
             }catch(IOException | InterruptedException ex){
-                if(ex instanceof InterruptedException) plugin.getLogger().info("Timed out while pinging " + server.getServerInfo().getName());
-                else if(!(ex instanceof ConnectException)) plugin.getLogger().error("Error while pinging a backend server: ", ex);
+                if(ex instanceof InterruptedException) plugin.getLogger().info(plugin.getMessage(
+                        "timeout").replace("{0}", server.getServerInfo().getName()));
+                else if(!(ex instanceof ConnectException)) plugin.getLogger().error(plugin.getMessage("error")
+                        .replace("{0}",((IOException) ex).getMessage()));
             }
             return json;
         });
