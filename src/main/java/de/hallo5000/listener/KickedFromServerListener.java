@@ -4,6 +4,7 @@ import com.velocitypowered.api.event.Continuation;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.KickedFromServerEvent;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import de.hallo5000.main.Utils;
 import de.hallo5000.main.VelocityVersionBouncer;
 import net.kyori.adventure.text.Component;
 
@@ -19,20 +20,22 @@ public class KickedFromServerListener {
 
     @Subscribe
     public void onPlayerKick(KickedFromServerEvent e, Continuation continuation){
-        plugin.getLogger().info("[FALLBACK-bouncing]");
+        plugin.getLogger().info(plugin.getMessage("fallback-bouncing"));
         if(plugin.getToml().getBoolean("enable-fallback-bouncing")){
             if(plugin.getToml().getString("explicit-fallback-server").equalsIgnoreCase("")){ //there is no explicit fallback server
                 RegisteredServer serverToExclude = plugin.getToml().getBoolean("exclude-previous-server") ? e.getServer() : null;
                 plugin.getUtils().findMatchingServer(e.getPlayer(), serverToExclude)
                         .whenComplete((s, t) -> {
                             if(s != null){
-                                plugin.getLogger().info("Connects to: " + s.getServerInfo().getName());
+                                plugin.getLogger().info(plugin.getMessage("connecting").replace(
+                                        "{0}",s.getServerInfo().getName()));
                                 e.setResult(KickedFromServerEvent.RedirectPlayer.create(s));
                             }else{
                                 if(e.getServerKickReason().isPresent())
-                                    e.setResult(KickedFromServerEvent.DisconnectPlayer.create(e.getServerKickReason().get().append(Component.text("\nand there is no fallback server with a matching game version available."))));
+                                    e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Utils.parse(plugin.getMessage(
+                                            "no-matching-server-args").replace("{0}",e.getServerKickReason().get().toString()))));
                                 else
-                                    e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text("There is no fallback server with a matching game version available.")));
+                                    e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Utils.parse(plugin.getMessage("no-matching-server"))));
                             }
                             if(t != null) continuation.resumeWithException(t);
                             else continuation.resume();
@@ -46,8 +49,9 @@ public class KickedFromServerListener {
                     if(e.getServerKickReason().isPresent())
                         e.setResult(KickedFromServerEvent.DisconnectPlayer.create(e.getServerKickReason().get().append(Component.text("\nand the fallback server is currently unavailable."))));
                     else
-                        e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text("The fallback server is currently unavailable.")));
-                    plugin.getLogger().info("It seems like the fallback server is offline and therefore " + e.getPlayer().getGameProfile().getName() + " was kicked from the server!");
+                        e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Utils.parse(plugin.getMessage("fallback-server-unavailable"))));
+                    plugin.getLogger().info(plugin.getMessage("fallback-server-unavailable-console")
+                            .replace("{0}", e.getPlayer().getGameProfile().getName()));
                 }
             }
         }

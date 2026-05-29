@@ -10,6 +10,7 @@ import com.velocitypowered.api.util.ModInfo;
 import de.hallo5000.pingHandler.PingHandler;
 import jakarta.json.Json;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,14 +37,16 @@ public class Utils {
         //take all backend servers or only the ones provided by the whitelist (if one exists) and remove the ones on the blacklist
         List<RegisteredServer> serverList = (new ArrayList<>(plugin.getToml().getList("whitelist")))
                 .stream().map(name -> plugin.getServer().getServer((String) name).orElseGet(() -> {
-                    plugin.getLogger().info("'" + name + "' could not be found!");
+                    plugin.getLogger().info(plugin.getMessage("cant-found")
+                            .replace("{0}",name.toString()));
                     return null;
                 })).filter(Objects::nonNull).collect(Collectors.toList());
         if(serverList.isEmpty()) serverList = new ArrayList<>(plugin.getServer().getAllServers());
         List<RegisteredServer> blacklist = Optional.ofNullable(plugin.getToml().getList("blacklist"))
                 .orElse(new ArrayList<>(Collections.emptyList()))
                 .stream().map(name -> plugin.getServer().getServer((String) name).orElseGet(() -> {
-                    plugin.getLogger().info("'"+ name + "' could not be found!");
+                    plugin.getLogger().info(plugin.getMessage("cant-found")
+                            .replace("{0}",name.toString()));
                     return null;
                 })).filter(Objects::nonNull).toList();
         serverList.removeAll(blacklist);
@@ -166,7 +169,8 @@ public class Utils {
         }
 
         //start checking
-        plugin.getLogger().info("Start checking for compatibilities (Client-Protocol: " + client.getProtocolVersion().getProtocol() + ")");
+        plugin.getLogger().info(plugin.getMessage("start-checking")
+                .replace("{0}", String.valueOf(client.getProtocolVersion().getProtocol())));
         List<RegisteredServer> matches = new ArrayList<>(); //every server with matching protocol version
         List<RegisteredServer> servers = plugin.getUtils().getConfigServerList();
         List<RegisteredServer> offlineServers = new ArrayList<>(servers);
@@ -191,17 +195,21 @@ public class Utils {
             //start checking servers for matches
             for(RegisteredServer s : servers){
                 if(serverToExclude != null && s == serverToExclude){
-                    plugin.getLogger().info("> " + s.getServerInfo().getName() + " is excluded");
+                    plugin.getLogger().info(plugin.getMessage("server-excluded")
+                            .replace("{0}", s.getServerInfo().getName()));
                 }else if(plugin.getBackendPingService().getProtocol(s).isEmpty()){
-                    plugin.getLogger().info("> " + s.getServerInfo().getName() + " is unavailable");
+                    plugin.getLogger().info(plugin.getMessage("server-unavailable")
+                            .replace("{0}", s.getServerInfo().getName()));
                 }else if(client.getProtocolVersion().getProtocol() == plugin.getBackendPingService().getProtocol(s).getAsInt()){
                     matches.add(s);
-                    plugin.getLogger().info("> " + s.getServerInfo().getName() + " is compatible (Server-Protocol: " + plugin.getBackendPingService().getProtocol(s).getAsInt() + ")");
+                    plugin.getLogger().info(plugin.getMessage("server-compatible")
+                            .replace("{0}", s.getServerInfo().getName()).replace("{1}", String.valueOf(plugin.getBackendPingService().getProtocol(s).getAsInt())));
                 }else
-                    plugin.getLogger().info("> " + s.getServerInfo().getName() + " is NOT compatible (Server-Protocol: " + plugin.getBackendPingService().getProtocol(s).getAsInt() + ")");
+                    plugin.getLogger().info(plugin.getMessage("server-not-compatible")
+                            .replace("{0}", s.getServerInfo().getName()).replace("{1}", String.valueOf(plugin.getBackendPingService().getProtocol(s).getAsInt())));
             }
             if(matches.isEmpty()){
-                plugin.getLogger().info("No server found for this client");
+                plugin.getLogger().info(plugin.getMessage("no-server-found"));
                 return null;
             }
             while(!matches.isEmpty()){
@@ -216,14 +224,17 @@ public class Utils {
                     socket.connect(finalServer.getServerInfo().getAddress(), 1000);
                     return finalServer;
                 }catch(IOException ex){
-                    plugin.getLogger().info("Matching server is unreachable, trying again...");
+                    plugin.getLogger().info(plugin.getMessage("server-unreachable"));
                     plugin.getBackendPingService().removePing(finalServer);
                     matches.remove(finalServer);
                 }
             }
-            plugin.getLogger().info("No server found for this client");
+            plugin.getLogger().info(plugin.getMessage("no-server-found"));
             return null;
         });
     }
-
+    public static Component parse(String text) {
+        return MiniMessage.miniMessage().deserialize(
+                text);
+    }
 }

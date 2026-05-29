@@ -1,0 +1,42 @@
+successfully-loaded: "Successfully loaded!"
+cant-create-folder: "Couldn't create plugins folder, probably caused by a missing permission."
+config-load-error: "Could not load config.toml file - Please check for errors {0}"
+
+fallback-bouncing: "[FALLBACK-bouncing]"
+connecting: "Connects to: {0}"
+no-matching-server-args: "{0}\nand there is no fallback server with a matching game version available."
+no-matching-server: "There is no fallback server with a matching game version available."
+fallback-server-unavailable: "The fallback server is currently unavailable."
+fallback-server-unavailable-console: "It seems like the fallback server is offline and therefore {0} was kicked from the server!"
+
+
+initial-join: "[Initial join - VersionBouncing]"
+no-matching-server-player: "Disconnected: There is no server with a matching game version available!"
+
+ping-incoming: "Server List Ping incoming..."
+ping-send: "Send ping response: {0}"
+no-server-ping: "No server ping found for {0}"
+
+error-json: "Some error occurred while trying to read a json object from another json string: {0}"
+
+cant-found: "'{0}' could not be found!"
+start-checking: "Start checking for compatibilities (Client-Protocol: {0})"
+server-excluded: "> {0} is excluded"
+server-unavailable: "> {0} is unavailable"
+server-compatible: "> {0} is compatible (Server-Protocol: {1})"
+server-not-compatible: "> {0} is NOT compatible (Server-Protocol: {1})"
+no-server-found: "No server found for this client"
+server-unreachable: "Matching server is unreachable, trying again..."
+
+ping-all: "Pinging every Backend Server..."
+ping-complete: "Pings complete!"
+ping-error: "while pinging: {0}"
+ping-successful: "Ping SUCCESSFUL for {0} - protocol version number: {1}"
+ping-failed: "Ping FAILED for {0}"
+ping-new: "New server registered. Pinging..."
+
+premature-end-of-stream: "Premature end of stream."
+packet0x00: "Invalid packetID"
+length0: "Invalid string length."
+timeout: "Timed out while pinging {0}"
+error: "Error while pinging a backend server: {0}"

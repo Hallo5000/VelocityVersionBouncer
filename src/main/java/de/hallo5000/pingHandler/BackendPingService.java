@@ -49,7 +49,7 @@ public class BackendPingService {
      * Simply calls <code>ping()</code> on every backend server contained in <code>getAllServers()</code>
      */
     public void pingAll(){
-        plugin.getLogger().info("Pinging every Backend Server...");
+        plugin.getLogger().info(plugin.getMessage("ping-all"));
         List<CompletableFuture<String>> futures = new ArrayList<>();
         for(RegisteredServer s : server.getAllServers()){
             futures.add(ping(s));
@@ -59,7 +59,8 @@ public class BackendPingService {
                 f.cancel(true);
             }
         }).delay(plugin.getToml().getLong("ping-intervall"), TimeUnit.SECONDS).schedule();
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).whenComplete((v, e) -> plugin.getLogger().info("Pings complete!"));
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).whenComplete(
+                (v, e) -> plugin.getLogger().info(plugin.getMessage("ping-complete")));
     }
 
     /**
@@ -70,16 +71,20 @@ public class BackendPingService {
      */
     public CompletableFuture<String> ping(RegisteredServer server){
         return pingHandler.ping(server).handle((json, error) -> {
-            if(error != null && !(error instanceof CancellationException)) plugin.getLogger().error("while pinging: ", error);
+            if(error != null && !(error instanceof CancellationException)) plugin.getLogger().error(
+                    plugin.getMessage("ping-error").replace("{0}",error.getMessage()));
             if(json != null){
                 pingCache.put(server, Optional.of(plugin.getUtils().getPingFromHandshake(json)));
                 if(getProtocol(server).isPresent()){
-                    plugin.getLogger().info("Ping SUCCESSFUL for " + server.getServerInfo().getName() + " - protocol version number: " + getProtocol(server).getAsInt());
+                    plugin.getLogger().info(plugin.getMessage("ping-successful")
+                            .replace("{0}", server.getServerInfo().getName())
+                            .replace("{1}", String.valueOf(getProtocol(server).getAsInt())));
                     return json;
                 }
             }
             pingCache.remove(server);
-            plugin.getLogger().info("Ping FAILED for " + server.getServerInfo().getName());
+            plugin.getLogger().info(plugin.getMessage("ping-failed").replace(
+                    "{0}", server.getServerInfo().getName()));
             return json;
         });
     }
@@ -112,7 +117,7 @@ public class BackendPingService {
 
     @Subscribe
     public void onServerRegistered(ServerRegisteredEvent e){
-        plugin.getLogger().info("New server registered. Pinging...");
+        plugin.getLogger().info(plugin.getMessage("ping-new"));
         ping(e.registeredServer());
     }
 

@@ -31,15 +31,17 @@ public class ProxyPingListener {
             return;
         }
 
-        plugin.getLogger().info("Server List Ping incoming...");
+        plugin.getLogger().info(plugin.getMessage("ping-incoming"));
         plugin.getUtils().findMatchingServer(e.getConnection(), null)
                 .whenComplete((s, t) -> {
                     if(s != null){
                         plugin.getBackendPingService().getPing(s).ifPresentOrElse((ping) ->{
-                            plugin.getLogger().info("Send ping response: " + s.getServerInfo().getName());
+                            plugin.getLogger().info(plugin.getMessage("ping-send")
+                                    .replace("{0}",s.getServerInfo().getName()));
                             e.setPing(ping);
                             e.setResult(ResultedEvent.GenericResult.allowed());
-                        },() -> plugin.getLogger().info("No server ping found for " + s.getServerInfo().getName()));
+                        },() -> plugin.getLogger().info(plugin.getMessage("no-server-ping")
+                                .replace("{0}",s.getServerInfo().getName())));
                     }
                     if(t != null) continuation.resumeWithException(t);
                     else continuation.resume();
