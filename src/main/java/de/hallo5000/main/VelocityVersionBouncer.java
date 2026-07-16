@@ -41,7 +41,6 @@ public class VelocityVersionBouncer implements Languaged {
     private final ProxyServer server;
     private final Logger logger;
     private final Path dataDirectory;
-    private final File dataFolder;
     private final LangLogger langLogger;
     private LanguageManager lang;
     private final Utils utils;
@@ -53,8 +52,7 @@ public class VelocityVersionBouncer implements Languaged {
     public VelocityVersionBouncer(ProxyServer server, @SuppressWarnings("unused") Logger logger, @DataDirectory Path dataDirectory) {
         this.server = server;
         this.logger = LoggerFactory.getLogger(this.getClass().getAnnotation(Plugin.class).name());
-        this.dataDirectory = dataDirectory.getParent().resolve(this.getClass().getAnnotation(Plugin.class).name());
-        this.dataFolder = dataDirectory.toFile();
+        this.dataDirectory = dataDirectory; //.getParent().resolve(this.getClass().getAnnotation(Plugin.class).name());
 
         this.langLogger = new LangLogger() {
             @Override
@@ -138,7 +136,7 @@ public class VelocityVersionBouncer implements Languaged {
 
     @Override
     public File getDataFolder() {
-        return dataFolder;
+        return dataDirectory.toFile();
     }
 
     @Override
@@ -147,7 +145,6 @@ public class VelocityVersionBouncer implements Languaged {
     }
 
     public String getMessage(String key) {
-        LanguageConfig config = lang.getDefaultConfig();
-        return config.get(key);
+        return lang.getDefaultConfig().get(key);
     }
 }
