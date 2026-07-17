@@ -10,7 +10,6 @@ import com.velocitypowered.api.util.ModInfo;
 import de.hallo5000.pingHandler.PingHandler;
 import jakarta.json.Json;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 
@@ -233,8 +232,5 @@ public class Utils {
             return null;
         });
     }
-    public static Component parse(String text) {
-        return MiniMessage.miniMessage().deserialize(
-                text);
-    }
+
 }
