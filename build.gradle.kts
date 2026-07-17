@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "de.hallo5000"
-version = "1.5.1-beta1"
+version = "1.6.0-release"
 
 repositories {
     mavenCentral()
