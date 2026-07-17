@@ -36,16 +36,14 @@ public class Utils {
         //take all backend servers or only the ones provided by the whitelist (if one exists) and remove the ones on the blacklist
         List<RegisteredServer> serverList = (new ArrayList<>(plugin.getToml().getList("whitelist")))
                 .stream().map(name -> plugin.getServer().getServer((String) name).orElseGet(() -> {
-                    plugin.getLogger().info(plugin.getMessage("cant-found")
-                            .replace("{0}",name.toString()));
+                    plugin.getLogger().info(plugin.getMessage("cant-found", name.toString()));
                     return null;
                 })).filter(Objects::nonNull).collect(Collectors.toList());
         if(serverList.isEmpty()) serverList = new ArrayList<>(plugin.getServer().getAllServers());
         List<RegisteredServer> blacklist = Optional.ofNullable(plugin.getToml().getList("blacklist"))
                 .orElse(new ArrayList<>(Collections.emptyList()))
                 .stream().map(name -> plugin.getServer().getServer((String) name).orElseGet(() -> {
-                    plugin.getLogger().info(plugin.getMessage("cant-found")
-                            .replace("{0}",name.toString()));
+                    plugin.getLogger().info(plugin.getMessage("cant-found", name.toString()));
                     return null;
                 })).filter(Objects::nonNull).toList();
         serverList.removeAll(blacklist);
@@ -163,13 +161,12 @@ public class Utils {
         if(client == null) return CompletableFuture.completedFuture(null);
         RegisteredServer match = plugin.getUtils().checkForExplicitRouting(client);
         if(match != null) {
-            plugin.getLogger().info(plugin.getMessage("found-explicit-routing").replace("{0}",match.getServerInfo().getName()));
+            plugin.getLogger().info(plugin.getMessage("found-explicit-routing", match.getServerInfo().getName()));
             return CompletableFuture.completedFuture(match);
         }
 
         //start checking
-        plugin.getLogger().info(plugin.getMessage("start-checking")
-                .replace("{0}", String.valueOf(client.getProtocolVersion().getProtocol())));
+        plugin.getLogger().info(plugin.getMessage("start-checking", String.valueOf(client.getProtocolVersion().getProtocol())));
         List<RegisteredServer> matches = new ArrayList<>(); //every server with matching protocol version
         List<RegisteredServer> servers = plugin.getUtils().getConfigServerList();
         List<RegisteredServer> offlineServers = new ArrayList<>(servers);
@@ -194,18 +191,14 @@ public class Utils {
             //start checking servers for matches
             for(RegisteredServer s : servers){
                 if(serverToExclude != null && s == serverToExclude){
-                    plugin.getLogger().info(plugin.getMessage("server-excluded")
-                            .replace("{0}", s.getServerInfo().getName()));
+                    plugin.getLogger().info(plugin.getMessage("server-excluded", s.getServerInfo().getName()));
                 }else if(plugin.getBackendPingService().getProtocol(s).isEmpty()){
-                    plugin.getLogger().info(plugin.getMessage("server-unavailable")
-                            .replace("{0}", s.getServerInfo().getName()));
+                    plugin.getLogger().info(plugin.getMessage("server-unavailable", s.getServerInfo().getName()));
                 }else if(client.getProtocolVersion().getProtocol() == plugin.getBackendPingService().getProtocol(s).getAsInt()){
                     matches.add(s);
-                    plugin.getLogger().info(plugin.getMessage("server-compatible")
-                            .replace("{0}", s.getServerInfo().getName()).replace("{1}", String.valueOf(plugin.getBackendPingService().getProtocol(s).getAsInt())));
+                    plugin.getLogger().info(plugin.getMessage("server-compatible", s.getServerInfo().getName(), String.valueOf(plugin.getBackendPingService().getProtocol(s).getAsInt())));
                 }else
-                    plugin.getLogger().info(plugin.getMessage("server-not-compatible")
-                            .replace("{0}", s.getServerInfo().getName()).replace("{1}", String.valueOf(plugin.getBackendPingService().getProtocol(s).getAsInt())));
+                    plugin.getLogger().info(plugin.getMessage("server-not-compatible", s.getServerInfo().getName(), String.valueOf(plugin.getBackendPingService().getProtocol(s).getAsInt())));
             }
             if(matches.isEmpty()){
                 plugin.getLogger().info(plugin.getMessage("no-server-found"));

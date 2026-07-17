@@ -36,12 +36,10 @@ public class ProxyPingListener {
                 .whenComplete((s, t) -> {
                     if(s != null){
                         plugin.getBackendPingService().getPing(s).ifPresentOrElse((ping) ->{
-                            plugin.getLogger().info(plugin.getMessage("ping-send")
-                                    .replace("{0}",s.getServerInfo().getName()));
+                            plugin.getLogger().info(plugin.getMessage("ping-send", s.getServerInfo().getName()));
                             e.setPing(ping);
                             e.setResult(ResultedEvent.GenericResult.allowed());
-                        },() -> plugin.getLogger().info(plugin.getMessage("no-server-ping")
-                                .replace("{0}",s.getServerInfo().getName())));
+                        },() -> plugin.getLogger().info(plugin.getMessage("no-server-ping", s.getServerInfo().getName())));
                     }
                     if(t != null) continuation.resumeWithException(t);
                     else continuation.resume();

@@ -110,8 +110,7 @@ public class JsonReader {
                 return Optional.of(builder.toString());
             }
         }catch(Exception ex){
-            plugin.getLogger().error(plugin.getMessage("error-json")
-                    .replace("{0}",ex.toString()));
+            plugin.getLogger().error(plugin.getMessage("error-json", ex.toString()));
         }
         return Optional.empty();
     }

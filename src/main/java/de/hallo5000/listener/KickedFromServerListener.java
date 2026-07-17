@@ -26,13 +26,12 @@ public class KickedFromServerListener {
                 plugin.getUtils().findMatchingServer(e.getPlayer(), serverToExclude)
                         .whenComplete((s, t) -> {
                             if(s != null){
-                                plugin.getLogger().info(plugin.getMessage("connecting").replace(
-                                        "{0}",s.getServerInfo().getName()));
+                                plugin.getLogger().info(plugin.getMessage("connecting", s.getServerInfo().getName()));
                                 e.setResult(KickedFromServerEvent.RedirectPlayer.create(s));
                             }else{
                                 if(e.getServerKickReason().isPresent())
                                     e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text(plugin.getMessage(
-                                            "no-matching-server-args").replace("{0}",e.getServerKickReason().get().toString()))));
+                                            "no-matching-server-args", e.getServerKickReason().get().toString()))));
                                 else
                                     e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text(plugin.getMessage("no-matching-server"))));
                             }
@@ -49,8 +48,7 @@ public class KickedFromServerListener {
                         e.setResult(KickedFromServerEvent.DisconnectPlayer.create(e.getServerKickReason().get().append(Component.text(plugin.getMessage("fallback-server-unavailable-kick")))));
                     else
                         e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text(plugin.getMessage("fallback-server-unavailable"))));
-                    plugin.getLogger().info(plugin.getMessage("fallback-server-unavailable-console")
-                            .replace("{0}", e.getPlayer().getGameProfile().getName()));
+                    plugin.getLogger().info(plugin.getMessage("fallback-server-unavailable-console", e.getPlayer().getGameProfile().getName()));
                 }
             }
         }
