@@ -99,8 +99,7 @@ public class VelocityVersionBouncer implements Languaged {
             if(!file.exists() && defaultConfig != null) Files.copy(defaultConfig, file.toPath());
             return new Toml(new Toml().read(defaultConfig)).read(file);
         }catch(IOException ex){
-            logger.error(this.getMessage("config-load-error")
-                    .replace("{0}", ex.getMessage()));
+            logger.error(this.getMessage("config-load-error", ex.getMessage()));
             return null;
         }
     }
@@ -146,5 +145,13 @@ public class VelocityVersionBouncer implements Languaged {
 
     public String getMessage(String key) {
         return lang.getDefaultConfig().get(key);
+    }
+
+    public String getMessage(String key, String... replacements){
+        String msg = getMessage(key);
+        for(int i = 0; i < replacements.length; i++){
+            msg = msg.replace("{"+i+"}", replacements[i]);
+        }
+        return msg;
     }
 }

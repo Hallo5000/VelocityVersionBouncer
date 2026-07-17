@@ -22,8 +22,7 @@ public class PlayerChooseInitialServerListener {
         plugin.getUtils().findMatchingServer(e.getPlayer(), null)
                 .whenComplete((s, t) -> {
                     if(s != null){
-                        plugin.getLogger().info(plugin.getMessage("connecting").replace(
-                                "{0}",s.getServerInfo().getName()));
+                        plugin.getLogger().info(plugin.getMessage("connecting", s.getServerInfo().getName()));
                         e.setInitialServer(s);
                     }else e.getPlayer().disconnect(Component.text(plugin.getMessage("no-matching-server-player")));
                     if(t != null) continuation.resumeWithException(t);

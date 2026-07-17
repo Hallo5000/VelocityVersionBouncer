@@ -109,9 +109,8 @@ public class PingHandler {
 
             }catch(IOException | InterruptedException ex){
                 if(ex instanceof InterruptedException) plugin.getLogger().info(plugin.getMessage(
-                        "timeout").replace("{0}", server.getServerInfo().getName()));
-                else if(!(ex instanceof ConnectException)) plugin.getLogger().error(plugin.getMessage("error")
-                        .replace("{0}",ex.getMessage()));
+                        "timeout", server.getServerInfo().getName()));
+                else if(!(ex instanceof ConnectException)) plugin.getLogger().error(plugin.getMessage("error",ex.getMessage()));
             }
             return json;
         });

@@ -72,19 +72,16 @@ public class BackendPingService {
     public CompletableFuture<String> ping(RegisteredServer server){
         return pingHandler.ping(server).handle((json, error) -> {
             if(error != null && !(error instanceof CancellationException)) plugin.getLogger().error(
-                    plugin.getMessage("ping-error").replace("{0}",error.getMessage()));
+                    plugin.getMessage("ping-error", error.getMessage()));
             if(json != null){
                 pingCache.put(server, Optional.of(plugin.getUtils().getPingFromHandshake(json)));
                 if(getProtocol(server).isPresent()){
-                    plugin.getLogger().info(plugin.getMessage("ping-successful")
-                            .replace("{0}", server.getServerInfo().getName())
-                            .replace("{1}", String.valueOf(getProtocol(server).getAsInt())));
+                    plugin.getLogger().info(plugin.getMessage("ping-successful", server.getServerInfo().getName(), String.valueOf(getProtocol(server).getAsInt())));
                     return json;
                 }
             }
             pingCache.remove(server);
-            plugin.getLogger().info(plugin.getMessage("ping-failed").replace(
-                    "{0}", server.getServerInfo().getName()));
+            plugin.getLogger().info(plugin.getMessage("ping-failed", server.getServerInfo().getName()));
             return json;
         });
     }
