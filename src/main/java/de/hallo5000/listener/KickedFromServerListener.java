@@ -4,7 +4,6 @@ import com.velocitypowered.api.event.Continuation;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.KickedFromServerEvent;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import de.hallo5000.main.Utils;
 import de.hallo5000.main.VelocityVersionBouncer;
 import net.kyori.adventure.text.Component;
 
@@ -32,10 +31,10 @@ public class KickedFromServerListener {
                                 e.setResult(KickedFromServerEvent.RedirectPlayer.create(s));
                             }else{
                                 if(e.getServerKickReason().isPresent())
-                                    e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Utils.parse(plugin.getMessage(
+                                    e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text(plugin.getMessage(
                                             "no-matching-server-args").replace("{0}",e.getServerKickReason().get().toString()))));
                                 else
-                                    e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Utils.parse(plugin.getMessage("no-matching-server"))));
+                                    e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text(plugin.getMessage("no-matching-server"))));
                             }
                             if(t != null) continuation.resumeWithException(t);
                             else continuation.resume();
@@ -47,9 +46,9 @@ public class KickedFromServerListener {
                     e.setResult(KickedFromServerEvent.RedirectPlayer.create(fallback.get()));
                 else{
                     if(e.getServerKickReason().isPresent())
-                        e.setResult(KickedFromServerEvent.DisconnectPlayer.create(e.getServerKickReason().get().append(Utils.parse(plugin.getMessage("fallback-server-unavailable-kick")))));
+                        e.setResult(KickedFromServerEvent.DisconnectPlayer.create(e.getServerKickReason().get().append(Component.text(plugin.getMessage("fallback-server-unavailable-kick")))));
                     else
-                        e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Utils.parse(plugin.getMessage("fallback-server-unavailable"))));
+                        e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text(plugin.getMessage("fallback-server-unavailable"))));
                     plugin.getLogger().info(plugin.getMessage("fallback-server-unavailable-console")
                             .replace("{0}", e.getPlayer().getGameProfile().getName()));
                 }

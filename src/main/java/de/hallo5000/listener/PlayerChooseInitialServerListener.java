@@ -3,7 +3,6 @@ package de.hallo5000.listener;
 import com.velocitypowered.api.event.Continuation;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
-import de.hallo5000.main.Utils;
 import de.hallo5000.main.VelocityVersionBouncer;
 import net.kyori.adventure.text.Component;
 
@@ -26,7 +25,7 @@ public class PlayerChooseInitialServerListener {
                         plugin.getLogger().info(plugin.getMessage("connecting").replace(
                                 "{0}",s.getServerInfo().getName()));
                         e.setInitialServer(s);
-                    }else e.getPlayer().disconnect(Utils.parse("no-matching-server-player"));
+                    }else e.getPlayer().disconnect(Component.text(plugin.getMessage("no-matching-server-player")));
                     if(t != null) continuation.resumeWithException(t);
                     else continuation.resume();
                 });
