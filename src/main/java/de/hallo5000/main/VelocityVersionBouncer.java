@@ -12,7 +12,6 @@ import de.hallo5000.listener.PlayerChooseInitialServerListener;
 import de.hallo5000.listener.ProxyPingListener;
 import de.hallo5000.pingHandler.BackendPingService;
 import de.themoep.utils.lang.LangLogger;
-import de.themoep.utils.lang.LanguageConfig;
 import de.themoep.utils.lang.velocity.LanguageManager;
 import de.themoep.utils.lang.velocity.Languaged;
 import org.slf4j.Logger;
@@ -32,7 +31,7 @@ TODO:
 */
 
 
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.5.0-release",
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.6.0-release",
         url = "https://github.com/Hallo5000/VelocityVersionBouncer",
         description = "This plugin redirects players to servers depending on their game version",
         authors = {"Hallo5000"})
