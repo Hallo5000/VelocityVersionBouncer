@@ -164,7 +164,7 @@ public class Utils {
         if(client == null) return CompletableFuture.completedFuture(null);
         RegisteredServer match = plugin.getUtils().checkForExplicitRouting(client);
         if(match != null) {
-            plugin.getLogger().info("Found explicit routing: " + match.getServerInfo().getName());
+            plugin.getLogger().info(plugin.getMessage("found-explicit-routing").replace("{0}",match.getServerInfo().getName()));
             return CompletableFuture.completedFuture(match);
         }
 
