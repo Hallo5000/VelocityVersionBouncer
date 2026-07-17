@@ -88,7 +88,7 @@ public class JsonReader {
                 if(event == JsonParser.Event.VALUE_NUMBER) return Optional.of(parser.getBigDecimal());
             }
         }catch(Exception ex){
-            plugin.getLogger().error("Some error occurred while trying to read some object from a json string: ", ex);
+            plugin.getLogger().error(plugin.getMessage("error-occurred"),ex);
         }
         return Optional.empty();
     }

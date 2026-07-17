@@ -10,6 +10,7 @@ no-matching-server-args: "{0}\nand there is no fallback server with a matching g
 no-matching-server: "There is no fallback server with a matching game version available."
 fallback-server-unavailable: "The fallback server is currently unavailable."
 fallback-server-unavailable-console: "It seems like the fallback server is offline and therefore {0} was kicked from the server!"
+fallback-server-unavailable-kick: "\nand the fallback server is currently unavailable."
 
 # PlayerChooseInitialServerListener
 initial-join: "[Initial join - VersionBouncing]"
@@ -22,6 +23,7 @@ no-server-ping: "No server ping found for {0}"
 
 # JsonReader
 error-json: "Some error occurred while trying to read a json object from another json string: {0}"
+error-occurred: "Some error occurred while trying to read some object from a json string: "
 
 # Utils
 cant-found: "'{0}' could not be found!"
@@ -32,6 +34,7 @@ server-compatible: "> {0} is compatible (Server-Protocol: {1})"
 server-not-compatible: "> {0} is NOT compatible (Server-Protocol: {1})"
 no-server-found: "No server found for this client"
 server-unreachable: "Matching server is unreachable, trying again..."
+found-explicit-routing: "Found explicit routing: {0}"
 
 # BackendPingService
 ping-all: "Pinging every Backend Server..."

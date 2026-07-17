@@ -10,6 +10,7 @@ no-matching-server-args: "{0}\n且没有游戏版本匹配的后端服务器可�
 no-matching-server: "没有游戏版本匹配的后端服务器可用. "
 fallback-server-unavailable: "后端服务器当前不可用. "
 fallback-server-unavailable-console: "后端服务器似乎已离线, 因此 {0} 已被踢出服务器！"
+fallback-server-unavailable-kick: "\n且后端服务器当前不可用."
 
 # PlayerChooseInitialServerListener
 initial-join: "[ 游戏加入 - 跳转中 ]"
@@ -22,6 +23,7 @@ no-server-ping: "未找到 {0} 的服务器 Ping 信息"
 
 # JsonReader
 error-json: "尝试从另一个 JSON 字符串读取 JSON 对象时发生错误: {0}"
+error-occurred: "尝试从 JSON 字符串读取信息时发生错误: "
 
 # Utils
 cant-found: "找不到 '{0}' ！"
@@ -32,6 +34,7 @@ server-compatible: "> {0} 兼容 (服务器协议: {1})"
 server-not-compatible: "> {0} 不兼容 (服务器协议: {1})"
 no-server-found: "未找到适合此客户端的服务器"
 server-unreachable: "匹配的服务器无法访问, 正在重试..."
+found-explicit-routing: "发现可用后端服务器: {0}"
 
 # BackendPingService
 ping-all: "正在 Ping 所有后端服务器..."

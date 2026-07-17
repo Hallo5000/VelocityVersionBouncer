@@ -47,7 +47,7 @@ public class KickedFromServerListener {
                     e.setResult(KickedFromServerEvent.RedirectPlayer.create(fallback.get()));
                 else{
                     if(e.getServerKickReason().isPresent())
-                        e.setResult(KickedFromServerEvent.DisconnectPlayer.create(e.getServerKickReason().get().append(Component.text("\nand the fallback server is currently unavailable."))));
+                        e.setResult(KickedFromServerEvent.DisconnectPlayer.create(e.getServerKickReason().get().append(Utils.parse(plugin.getMessage("fallback-server-unavailable-kick")))));
                     else
                         e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Utils.parse(plugin.getMessage("fallback-server-unavailable"))));
                     plugin.getLogger().info(plugin.getMessage("fallback-server-unavailable-console")
