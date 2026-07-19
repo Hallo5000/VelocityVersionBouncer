@@ -1,0 +1,52 @@
+# VelocityVersionBouncer (main class)
+successfully-loaded: "Erfolgreich geladen!"
+cant-create-folder: "plugins-Ordner konnte nicht erstellt werden, vermutlich eine fehlende Berechtigung."
+config-load-error: "config.toml-Datei konnte nicht geladen werden - Bitte prüfe auf Fehler {0}"
+
+# KickedFromServerListener
+fallback-bouncing: "[FALLBACK-bouncing]"
+connecting: "Verbindet mit: {0}"
+no-matching-server-args: "{0}\nund es ist kein Ausweich-Server mit passender Spielversion verfügbar."
+no-matching-server: "Es ist kein Ausweich-Server mit passender Spielversion verfügbar."
+fallback-server-unavailable: "Der Ausweich-Server ist aktuell nicht verfügbar."
+fallback-server-unavailable-console: "Es sieht aus als wäre der Ausweich-Server offline und deswegen wurde {0} vom Server geworfen!"
+fallback-server-unavailable-kick: "\nund der Ausweich-Server ist aktuell nicht verfügbar."
+
+# PlayerChooseInitialServerListener
+initial-join: "[Initial join - VersionBouncing]"
+no-matching-server-player: "Verbindung getrennt: Es ist kein Server mit passender Spielversion verfügbar!"
+
+# ProxyPingListener
+ping-incoming: "Eingehender Server List Ping..."
+ping-send: "Sende Ping-Antwort: {0}"
+no-server-ping: "Keinen Server-Ping für {0} gefunden"
+
+# JsonReader
+error-json: "Ein Fehler ist aufgetreten beim Versuch ein JSON-Objekt aus einem anderen JSON-String zu lesen: {0}"
+error-occurred: "Ein Fehler ist aufgetreten beim Versuch ein Objekt aus einem JSON-String zu lesen: "
+
+# Utils
+cant-found: "'{0}' konnte nicht gefunden werden!"
+start-checking: "Suche nach Kompatibilitäten (Client-Protokoll: {0})"
+server-excluded: "> {0} ist ausgeschlossen"
+server-unavailable: "> {0} ist nicht verfügbar"
+server-compatible: "> {0} ist kompatibel (Server-Protokoll: {1})"
+server-not-compatible: "> {0} ist NICHT kompatibel (Server-Protokoll: {1})"
+no-server-found: "Keinen Server für diesen Client gefunden"
+server-unreachable: "Passender Server ist unerreichbar, versuche erneut..."
+found-explicit-routing: "Explizites Routing gefunden: {0}"
+
+# BackendPingService
+ping-all: "Pinge jeden Backend Server..."
+ping-complete: "Pings abgeschlossen!"
+ping-error: "Beim Pingen: {0}"
+ping-successful: "Ping ERFOLGREICH für {0} - Protokoll-Versionsnummer: {1}"
+ping-failed: "Ping FEHLGESCHLAGEN für {0}"
+ping-new: "Neuer Server registriert. Pinge..."
+
+# PingHandler
+premature-end-of-stream: "Vorzeitiges Ende des Streams."
+packet0x00: "Ungültige packetID"
+length0: "Ungültige String-Länge."
+timeout: "Zeitüberschreitung beim Pingen {0}"
+error: "Fehler beim Pingen eines Backend-Servers: {0}"
