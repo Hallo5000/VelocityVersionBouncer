@@ -64,7 +64,7 @@ public class Utils {
         Map<String, Object> explicitRoutings = new LinkedHashMap<>(plugin.getToml().getTable("explicit-routing").toMap());
         //removes all invalid explicit routings
         for(String s : explicitRoutings.keySet()){
-            if(s.isEmpty() || !s.matches("^(?=[pvc])((p\\d{3})|(v1_\\d+_\\d+))?(c\\S+)?$")) explicitRoutings.remove(s);
+            if(s.isEmpty() || !s.matches("^(?=[pvc])((p\\d{3})|(v\\d+_\\d+(_\\d+)?))?(c\\S+)?$")) explicitRoutings.remove(s);
         }
         //removes all explicit routings with unmatching client brands
         for(String s : new HashSet<>(explicitRoutings.keySet())){
