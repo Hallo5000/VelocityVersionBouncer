@@ -28,6 +28,8 @@ TODO:
 - fix changelog in workflows
 - ViaVersion detect
 - set different log levels for each logging call (log-level in config)
+- check compatability with forced-hosts
+- command to reload config without restarting the proxy
 */
 
 

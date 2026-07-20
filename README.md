@@ -8,15 +8,16 @@
 - Everytime a client connects to your proxy the plugin will check all the registered servers and compare their protocol versions (game versions).
 - By default, the first server that matches will be selected (you can change that in the config).
 - There is a config.toml file located in the plugins folder (`plugins/VelocityVersionBouncer/config.toml`).
-- In the config itself each option is pretty well explained (nevertheless I'll include an example config.toml at the end of this README).
+- The clients can be routed automatically or based on the explicit routings set in the config.
 - Optional features include: a fallback functionality as well as comparing versions for server list pings.
+- You can also change the plugins language (currently `en_US`, `zh_CN` and `de_DE` are available).
 ### ❓ Questions you may have:
 - **Is this also triggered when changing servers via `/server`?** No, the version checking is only triggered when connecting initially (from the multiplayer server list) or when using the fallback functionality.
 - **What happens if no compatible server is found?** The client will simply be disconnected with the according note/reason.
 - **Does this work with modded minecraft servers?** If you're using setups like Ambassador+ProxyCompatibleForge [(more information)](https://docs.papermc.io/velocity/server-compatibility) this plugin will route the client based purely on their protocol version (game version), not their installed mods. _Note: This setup has only been tested with PaperMC and (Neo)Forge servers._
 ### 📦 Installation & 🛠️ Requirements
 1. Download the `.jar` file of the last stable release ([here](https://github.com/Hallo5000/VelocityVersionBouncer/blob/master/build/libs/VelocityVersionBouncer-1.6.0-release.jar)) or build it yourself (the gradle files are included).
-2. Put the file in your servers `plugins/` folder (only the proxy!) and restart the server once to generate the config file.
+2. Put the file in your servers `plugins/` folder (only the proxy!) and restart the server once to generate the config file at `plugins/velocityversionbouncer/config.toml`.
 3. When you're finished editing the config restart the proxy once more and everything should be working.
 _Note: this plugin may not work properly if you are not running on `Java 21` (or higher) and `Velocity 3.4.0` or above_
 4. If you're having problems: make sure you're not using a snapshot (as these are expected to be unstable and this README is always explaining the latest release anyway), if there's still a problem feel free to open an issue on the plugins GitHub repository.
@@ -24,6 +25,9 @@ _Note: this plugin may not work properly if you are not running on `Java 21` (or
 ## Example Config:
 ```toml
 # This config is used to determine how and if servers are checked for their protocol versions whenever a client tries to connect to a backend server (and optionally if they lost connection)
+
+# en_US zh_CN de_DE
+language = "en_US"
 
 # 'whitelist' is a string array of server names to check for their protocol version when a client tries to connect.
 # leaving this empty is equal to putting all registered servers in
@@ -67,9 +71,9 @@ explicit-fallback-server = "lobby"
 
 # ------ explicit routing ------
 # Syntax
-#   v1_x_x - game version
-#   p000 - protocol version (Protocol Versions for every release/snapshot can be found here: https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Protocol_version_numbers)
-#   cFORGE - Client brand (for example: vanilla, forge, fabric, Geyser (for player joining through GeyserMC), badlion, etc.
+#   vX_X_X - game version
+#   p000 - protocol version (Protocol version numbers for every release/snapshot can be found here: https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Protocol_version_numbers)
+#   cXYZ - Client brand (for example: vanilla, forge, fabric, Geyser (for player joining through GeyserMC), badlion, etc.
 # either a game version (v) or a protocol version (p) is necessary but client brands (c) are completely optional
 # when no client brand is defined the routing just takes every client joining with the defined game/protocol version
 [explicit-routing]
