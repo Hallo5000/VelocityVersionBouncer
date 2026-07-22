@@ -2,6 +2,8 @@ package de.hallo5000.main;
 
 import com.google.inject.Inject;
 import com.moandjiezana.toml.Toml;
+import com.velocitypowered.api.command.CommandManager;
+import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
@@ -86,6 +88,10 @@ public class VelocityVersionBouncer implements Languaged {
         server.getEventManager().register(this, new PlayerChooseInitialServerListener(this));
         server.getEventManager().register(this, new KickedFromServerListener(this));
         server.getEventManager().register(this, new ProxyPingListener(this));
+
+        CommandManager cmdManager = server.getCommandManager();
+        CommandMeta cmdMeta = cmdManager.metaBuilder("velocityversionbouncer").aliases("vvb").plugin(this).build();
+        cmdManager.register(cmdMeta, new VVBCommand(this));
 
         logger.info(this.getMessage("successfully-loaded"));
 
