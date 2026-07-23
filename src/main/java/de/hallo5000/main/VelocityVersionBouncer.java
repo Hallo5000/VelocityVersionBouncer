@@ -102,7 +102,10 @@ public class VelocityVersionBouncer implements Languaged {
         if(!dataFolder.exists() && !dataFolder.mkdirs()) logger.error(this.getMessage("cant-create-folder"));
         File file = new File(dataFolder, "config.toml");
         try(InputStream defaultConfig = getClass().getClassLoader().getResourceAsStream("config.toml")){
-            if(!file.exists() && defaultConfig != null) Files.copy(defaultConfig, file.toPath());
+            if(!file.exists() && defaultConfig != null){
+                Files.copy(defaultConfig, file.toPath());
+                return new Toml().read(file); //needs to be here because if merged with the other return the InputStream would be read twice
+            }
             return new Toml(new Toml().read(defaultConfig)).read(file);
         }catch(IOException ex){
             logger.error(this.getMessage("config-load-error", ex.getMessage()));
