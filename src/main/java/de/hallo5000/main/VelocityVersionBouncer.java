@@ -82,6 +82,7 @@ public class VelocityVersionBouncer implements Languaged {
 
     @Subscribe
     public void onInitialize(ProxyInitializeEvent e) {
+        lang = new LanguageManager(this, "languages", "en_US"); //setting this so getMessage can be used in reload/loadConfig
         reload();
 
         server.getEventManager().register(this, new PlayerChooseInitialServerListener(this));
