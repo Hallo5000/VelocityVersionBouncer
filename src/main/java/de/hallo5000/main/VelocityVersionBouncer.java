@@ -35,7 +35,7 @@ TODO:
 */
 
 
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.6.0-release",
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.6.1-SNAPSHOT",
         url = "https://github.com/Hallo5000/VelocityVersionBouncer",
         description = "This plugin redirects players to servers depending on their game version",
         authors = {"Hallo5000"})
@@ -82,8 +82,7 @@ public class VelocityVersionBouncer implements Languaged {
 
     @Subscribe
     public void onInitialize(ProxyInitializeEvent e) {
-        toml = loadConfig();
-        lang = new LanguageManager(this, "languages", this.getToml().getString("language", "en_US"));
+        reload();
 
         server.getEventManager().register(this, new PlayerChooseInitialServerListener(this));
         server.getEventManager().register(this, new KickedFromServerListener(this));
@@ -91,7 +90,7 @@ public class VelocityVersionBouncer implements Languaged {
 
         CommandManager cmdManager = server.getCommandManager();
         CommandMeta cmdMeta = cmdManager.metaBuilder("velocityversionbouncer").aliases("vvb").plugin(this).build();
-        cmdManager.register(cmdMeta, new VVBCommand(this));
+        cmdManager.register(cmdMeta, new VVBCommand(this, this::reload));
 
         logger.info(this.getMessage("successfully-loaded"));
 
@@ -109,6 +108,11 @@ public class VelocityVersionBouncer implements Languaged {
             logger.error(this.getMessage("config-load-error", ex.getMessage()));
             return null;
         }
+    }
+
+    private void reload(){
+        toml = loadConfig();
+        if(toml != null) lang = new LanguageManager(this, "languages", this.getToml().getString("language", "en_US"));
     }
 
     public ProxyServer getServer(){
