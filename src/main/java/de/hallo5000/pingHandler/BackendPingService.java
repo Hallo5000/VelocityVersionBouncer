@@ -74,10 +74,15 @@ public class BackendPingService {
             if(error != null && !(error instanceof CancellationException)) plugin.getLogger().error(
                     plugin.getMessage("ping-error", error.getMessage()));
             if(json != null){
-                pingCache.put(server, Optional.of(plugin.getUtils().getPingFromHandshake(json)));
-                if(getProtocol(server).isPresent()){
-                    plugin.getLogger().info(plugin.getMessage("ping-successful", server.getServerInfo().getName(), String.valueOf(getProtocol(server).getAsInt())));
-                    return json;
+                try {
+                    ServerPing ping = plugin.getUtils().getPingFromHandshake(json);
+                    pingCache.put(server, Optional.of(ping));
+                    if(ping.getVersion() != null){
+                        plugin.getLogger().info(plugin.getMessage("ping-successful", server.getServerInfo().getName(), String.valueOf(ping.getVersion().getProtocol())));
+                        return json;
+                    }
+                } catch (RuntimeException ex) {
+                    plugin.getLogger().error(plugin.getMessage("ping-error", ex.getMessage()));
                 }
             }
             pingCache.remove(server);
