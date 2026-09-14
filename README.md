@@ -13,7 +13,7 @@
 - You can also change the plugins language (currently `en_US`, `zh_CN` and `de_DE` are available).
 ### ❓ Questions you may have:
 - **Is this also triggered when changing servers via `/server`?** No, the version checking is only triggered when connecting initially (from the multiplayer server list) or when using the fallback functionality.
-- **What happens if no compatible server is found?** The client will simply be disconnected with the according note/reason.
+- **What happens if no compatible server is found?** The configured `fallback-server` is used as a last resort. If it is not set, the client is disconnected with the corresponding note/reason.
 - **Does this work with modded minecraft servers?** If you're using setups like Ambassador+ProxyCompatibleForge [(more information)](https://docs.papermc.io/velocity/server-compatibility) this plugin will route the client based purely on their protocol version (game version), not their installed mods. _Note: This setup has only been tested with PaperMC and (Neo)Forge servers._
 ### 📦 Installation & 🛠️ Requirements
 1. Download the `.jar` file of the last stable release ([here](https://github.com/Hallo5000/VelocityVersionBouncer/blob/master/build/libs/VelocityVersionBouncer-1.6.0-release.jar)) or build it yourself (the gradle files are included).
@@ -44,6 +44,10 @@ blacklist = ["devServer"]
 #   "FIRST-MATCH" - players will be sent to the first matching server
 #   "BALANCED" - players will be evenly distributed over all matching servers
 distribution = "FIRST-MATCH"
+
+# The server to use as a last resort when no compatible and available server can be found.
+# This server is not checked for compatibility or availability. Leave empty to disable.
+fallback-server = ""
 
 # This option if set to 'true' lets you override verlocity's way of determining the server list ping response by using the try-list of the config ('ping-passthrough')
 # instead when a client sends a server ping it will use the same algorithm to determine a matching server as in the joining/fallback process
