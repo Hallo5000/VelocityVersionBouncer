@@ -132,7 +132,7 @@ public class Utils {
         ModInfo modInfo = null;
         if(plugin.getJsonReader().findKeyInJson(Json.createParser(new StringReader(json)), new String[]{"modinfo"})){
             List<ModInfo.Mod> modList = plugin.getJsonReader().getJsonFromJson(json, new String[]{"modinfo", "modList"})
-                    .map(jsonArray -> new Gson().fromJson(jsonArray, ModInfo.Mod.class))
+                    .map(jsonArray -> new Gson().fromJson(jsonArray, ModInfo.Mod[].class))
                     .map(Arrays::asList)
                     .orElse(defaultModList);
             modInfo = new ModInfo(plugin.getJsonReader().getStringFromJson(json, new String[]{"modinfo", "type"}).orElse(defaultModInfoType), modList);
