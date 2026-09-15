@@ -172,7 +172,7 @@ public class Utils {
         List<RegisteredServer> offlineServers = new ArrayList<>(servers);
         offlineServers.removeAll(plugin.getBackendPingService().getPingCache().keySet());
         //check if offline servers are still offline
-        List<CompletableFuture<String>> futures = new ArrayList<>();
+        List<CompletableFuture<Optional<ServerPing>>> futures = new ArrayList<>();
         for(RegisteredServer s : offlineServers){
             futures.add(CompletableFuture.supplyAsync(() -> {
                 try(Socket socket = new Socket()){

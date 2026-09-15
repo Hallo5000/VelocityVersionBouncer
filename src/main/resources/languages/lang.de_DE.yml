@@ -11,7 +11,9 @@ no-matching-server-args: "{0}\nund es ist kein Ausweich-Server mit passender Spi
 no-matching-server: "Es ist kein Ausweich-Server mit passender Spielversion verfügbar."
 fallback-server-unavailable: "Der Ausweich-Server ist aktuell nicht verfügbar."
 fallback-server-unavailable-console: "Es sieht aus als wäre der Ausweich-Server offline und deswegen wurde {0} vom Server geworfen!"
-fallback-server-unavailable-kick: "\nund der Ausweich-Server ist aktuell nicht verfügbar."
+fallback-server-misconfigured-console: "Der Ausweich-Server ist nicht registriert, er könnte fehlerhaft konfiguriert sein (Vielleicht ein Tippfehler)!"
+fallback-server-loop: "Der Ausweich-Server ist der selbe von dem du gekickt wurdest."
+fallback-server-loop-console: "Der Ausweich-Server ist der selbe von dem {0} gekickt wurde. Das könnte potentiell zu einer unendlichen Schleife führen."
 
 # PlayerChooseInitialServerListener
 initial-join: "[Initial join - VersionBouncing]"

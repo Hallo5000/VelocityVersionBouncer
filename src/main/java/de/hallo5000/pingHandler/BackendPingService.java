@@ -50,12 +50,12 @@ public class BackendPingService {
      */
     public void pingAll(){
         plugin.getLogger().info(plugin.getMessage("ping-all"));
-        List<CompletableFuture<String>> futures = new ArrayList<>();
+        List<CompletableFuture<Optional<ServerPing>>> futures = new ArrayList<>();
         for(RegisteredServer s : server.getAllServers()){
             futures.add(ping(s));
         }
         server.getScheduler().buildTask(plugin, () -> { //timeout
-            for(CompletableFuture<String> f : futures){
+            for(CompletableFuture<Optional<ServerPing>> f : futures){
                 f.cancel(true);
             }
         }).delay(plugin.getToml().getLong("ping-intervall"), TimeUnit.SECONDS).schedule();
@@ -69,7 +69,7 @@ public class BackendPingService {
      * @return a CompletableFuture with the ping response
      * @throws NullPointerException if the given <code>RegisteredServer</code> is null
      */
-    public CompletableFuture<String> ping(RegisteredServer server){
+    public CompletableFuture<Optional<ServerPing>> ping(RegisteredServer server){
         return pingHandler.ping(server).handle((json, error) -> {
             if(error != null && !(error instanceof CancellationException)) plugin.getLogger().error(
                     plugin.getMessage("ping-error", error.getMessage()));
@@ -79,7 +79,7 @@ public class BackendPingService {
                     pingCache.put(server, Optional.of(ping));
                     if(ping.getVersion() != null){
                         plugin.getLogger().info(plugin.getMessage("ping-successful", server.getServerInfo().getName(), String.valueOf(ping.getVersion().getProtocol())));
-                        return json;
+                        return getPing(server);
                     }
                 } catch (RuntimeException ex) {
                     plugin.getLogger().error(plugin.getMessage("ping-error", ex.getMessage()));
@@ -87,7 +87,7 @@ public class BackendPingService {
             }
             pingCache.remove(server);
             plugin.getLogger().info(plugin.getMessage("ping-failed", server.getServerInfo().getName()));
-            return json;
+            return getPing(server);
         });
     }
 

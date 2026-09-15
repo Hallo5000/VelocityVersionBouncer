@@ -8,6 +8,7 @@ import de.hallo5000.main.VelocityVersionBouncer;
 import net.kyori.adventure.text.Component;
 
 import java.util.*;
+import java.util.concurrent.CancellationException;
 
 public class KickedFromServerListener {
 
@@ -41,15 +42,42 @@ public class KickedFromServerListener {
                 return;
             }else{
                 Optional<RegisteredServer> fallback = plugin.getServer().getServer(plugin.getToml().getString("explicit-fallback-server"));
-                if(fallback.map(rs -> plugin.getBackendPingService().ping(rs)).isPresent())
-                    e.setResult(KickedFromServerEvent.RedirectPlayer.create(fallback.get()));
-                else{
+                if(fallback.isEmpty()){ //fallback is misconfigured (maybe typo; fallback is not registered)
                     if(e.getServerKickReason().isPresent())
-                        e.setResult(KickedFromServerEvent.DisconnectPlayer.create(e.getServerKickReason().get().append(Component.text(plugin.getMessage("fallback-server-unavailable-kick")))));
-                    else
-                        e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text(plugin.getMessage("fallback-server-unavailable"))));
-                    plugin.getLogger().info(plugin.getMessage("fallback-server-unavailable-console", e.getPlayer().getGameProfile().getName()));
+                        e.setResult(KickedFromServerEvent.DisconnectPlayer.create(e.getServerKickReason().get().append(Component.text("\n")).append(Component.text(plugin.getMessage("fallback-server-unavailable")))));
+                    else e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text(plugin.getMessage("fallback-server-unavailable"))));
+                    plugin.getLogger().info(plugin.getMessage("fallback-server-misconfigured-console"));
+                    continuation.resume();
+                    return;
                 }
+                plugin.getBackendPingService().ping(fallback.get()).whenCompleteAsync(((ping, throwable) -> {
+                    if(throwable != null){
+                        if(!(throwable instanceof CancellationException)) plugin.getLogger().error(plugin.getMessage("ping-error", throwable.getMessage()));
+
+                        if(e.getServerKickReason().isPresent())
+                            e.setResult(KickedFromServerEvent.DisconnectPlayer.create(e.getServerKickReason().get().append(Component.text("\n")).append(Component.text(plugin.getMessage("fallback-server-unavailable")))));
+                        else e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text(plugin.getMessage("fallback-server-unavailable"))));
+                        plugin.getLogger().info(plugin.getMessage("fallback-server-unavailable-console", e.getPlayer().getGameProfile().getName()));
+
+                        continuation.resumeWithException(throwable);
+                        return;
+                    }
+                    if(ping.isPresent() && !fallback.get().equals(e.getServer())){
+                        e.setResult(KickedFromServerEvent.RedirectPlayer.create(fallback.get()));
+                    }else if(ping.isEmpty()){
+                        if(e.getServerKickReason().isPresent())
+                            e.setResult(KickedFromServerEvent.DisconnectPlayer.create(e.getServerKickReason().get().append(Component.text("\n")).append(Component.text(plugin.getMessage("fallback-server-unavailable")))));
+                        else e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text(plugin.getMessage("fallback-server-unavailable"))));
+                        plugin.getLogger().info(plugin.getMessage("fallback-server-unavailable-console", e.getPlayer().getGameProfile().getName()));
+                    }else{
+                        if(e.getServerKickReason().isPresent())
+                            e.setResult(KickedFromServerEvent.DisconnectPlayer.create(e.getServerKickReason().get().append(Component.text("\n")).append(Component.text(plugin.getMessage("fallback-server-loop")))));
+                        else e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text(plugin.getMessage("fallback-server-loop"))));
+                        plugin.getLogger().info(plugin.getMessage("fallback-server-loop-console", e.getPlayer().getGameProfile().getName()));
+                    }
+                    continuation.resume();
+                }));
+                return;
             }
         }
         continuation.resume();
