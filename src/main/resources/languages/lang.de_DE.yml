@@ -1,5 +1,6 @@
 # VelocityVersionBouncer (main class)
 successfully-loaded: "Erfolgreich geladen!"
+config-reload: "Config neu geladen!"
 cant-create-folder: "plugins-Ordner konnte nicht erstellt werden, vermutlich eine fehlende Berechtigung."
 config-load-error: "config.toml-Datei konnte nicht geladen werden - Bitte prüfe auf Fehler {0}"
 

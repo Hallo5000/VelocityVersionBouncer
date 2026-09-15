@@ -21,11 +21,15 @@ public class VVBCommand implements SimpleCommand {
 
         if(args.length > 0){
             if(args[0].equalsIgnoreCase("reloadConfig")){
-                if(invocation.source().equals(plugin.getServer().getConsoleCommandSource())){
-                    reload.run();
-                }
+                reload.run();
+                if(invocation.source().equals(plugin.getServer().getConsoleCommandSource()))
+                    plugin.getLogger().info(plugin.getMessage("config-reload"));
+                else invocation.source().sendPlainMessage(plugin.getMessage("config-reload"));
+                return;
             }
         }
+        if(invocation.source().equals(plugin.getServer().getConsoleCommandSource())) plugin.getLogger().error("/vvb <reloadConfig>");
+        else invocation.source().sendPlainMessage("/vvb <reloadConfig>");
     }
 
     @Override

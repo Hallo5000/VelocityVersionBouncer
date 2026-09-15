@@ -16,6 +16,8 @@ import de.hallo5000.pingHandler.BackendPingService;
 import de.themoep.utils.lang.LangLogger;
 import de.themoep.utils.lang.velocity.LanguageManager;
 import de.themoep.utils.lang.velocity.Languaged;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
