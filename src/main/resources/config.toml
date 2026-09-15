@@ -19,9 +19,9 @@ blacklist = []
 #   "BALANCED" - players will be evenly distributed over all matching servers
 distribution = "FIRST-MATCH"
 
-# The server to use as a last resort when no compatible and available server can be found.
-# This server is not checked for compatibility or availability. Leave empty to disable.
-fallback-server = ""
+# Use 'explicit-fallback-server' as a last resort when no compatible and available server can be found.
+# WARNING: The fallback server's compatibility and availability will not be checked.
+unsafe-dont-perform-checks-for-fallback = false
 
 # This option if set to 'true' lets you override verlocity's way of determining the server list ping response by using the try-list of the config ('ping-passthrough')
 # instead when a client sends a server ping it will use the same algorithm to determine a matching server as in the joining/fallback process

@@ -50,15 +50,6 @@ public class Utils {
         return serverList;
     }
 
-    private @Nullable RegisteredServer getFallbackServer(){
-        String serverName = plugin.getToml().getString("fallback-server", "");
-        if(serverName.isBlank()) return null;
-        return plugin.getServer().getServer(serverName).orElseGet(() -> {
-            plugin.getLogger().info(plugin.getMessage("cant-found", serverName));
-            return null;
-        });
-    }
-
     /**
      * Gets all explicit routings from the plugins config.yml and searches for matching routings (may not be in order)
      * @param inboundConnection the client whose protocol to compare the explicit routings to
@@ -210,8 +201,11 @@ public class Utils {
                     plugin.getLogger().info(plugin.getMessage("server-not-compatible", s.getServerInfo().getName(), String.valueOf(plugin.getBackendPingService().getProtocol(s).getAsInt())));
             }
             if(matches.isEmpty()){
-                RegisteredServer fallbackServer = getFallbackServer();
-                if(fallbackServer != null) return fallbackServer;
+                if(plugin.getToml().getBoolean("unsafe-dont-perform-checks-for-fallback", false)){
+                    String serverName = plugin.getToml().getString("explicit-fallback-server", "");
+                    RegisteredServer fallbackServer = plugin.getServer().getServer(serverName).orElse(null);
+                    if(fallbackServer != null) return fallbackServer;
+                }
                 plugin.getLogger().info(plugin.getMessage("no-server-found"));
                 return null;
             }
@@ -232,8 +226,6 @@ public class Utils {
                     matches.remove(finalServer);
                 }
             }
-            RegisteredServer fallbackServer = getFallbackServer();
-            if(fallbackServer != null) return fallbackServer;
             plugin.getLogger().info(plugin.getMessage("no-server-found"));
             return null;
         });
