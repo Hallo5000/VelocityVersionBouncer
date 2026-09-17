@@ -41,6 +41,7 @@ enable-fallback-bouncing = true
 exclude-previous-server = false
 # When there is a valid server name in 'explicit-fallback-server' the plugin won't search for a new server and instead only tries the specified server.
 # Leave this empty, if you'd like to disable this option (also this is disabled when enable-fallback-bouncing is set to false).
+# WARNING: this will not check whether the versions match or not
 explicit-fallback-server = ""
 
 # ------ explicit routing ------

@@ -24,7 +24,7 @@ public class JsonReader {
      * Moves the parser according to the path array.
      * @param parser a <code>JsonParser</code> with the string to scan
      * @param path the path to find
-     * @return whether or no the json string from the parser contains the value at path
+     * @return whether or no the JSON string from the parser contains the value at path
      */
     public boolean findKeyInJson(JsonParser parser, String[] path){
         if(path == null || path.length == 0) return false;
@@ -72,7 +72,7 @@ public class JsonReader {
 
     /**
      * Reads an int from a json formatted string even if a part is missing at the end
-     * @param json valid json as a string (can be not-finished)
+     * @param json valid JSON as a string (can be not-finished)
      * @param path a string array containing every key in the path to the one trying to be found
      * @return an <code>Optional</code> containing the value to the path or empty if not found or null
      */
@@ -95,9 +95,9 @@ public class JsonReader {
 
     /**
      * Goes to the key specified by <code>path</code> and returns an <code>Optional</code> possibly containing a json object
-     * @param json the json string to search the path in
-     * @param path the path in the json string to find the json object at
-     * @return an <code>Optional</code> containing the json object or <code>Optional.empty()</code> if no json object was found
+     * @param json the JSON string to search the path in
+     * @param path the path in the JSON string to find the JSON object at
+     * @return an <code>Optional</code> containing the JSON object or <code>Optional.empty()</code> if no JSON object was found
      */
     public Optional<String> getJsonFromJson(String json, String[] path){
         if(json == null) return Optional.empty();
@@ -117,8 +117,8 @@ public class JsonReader {
 
     /**
      * Builds a string containing the json object the <code>JsonParser</code> is at
-     * @param builder the <code>StringBuilder</code> to build the json string with
-     * @param parser the <code>JsonParser</code> to get the json object from
+     * @param builder the <code>StringBuilder</code> to build the JSON string with
+     * @param parser the <code>JsonParser</code> to get the JSON object from
      */
     private void buildJson(StringBuilder builder, JsonParser parser){
         JsonParser.Event event = parser.currentEvent();

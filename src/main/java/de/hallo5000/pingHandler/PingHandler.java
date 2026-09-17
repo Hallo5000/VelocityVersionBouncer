@@ -23,7 +23,7 @@ public class PingHandler {
      * Tries to do a Handshake with the given backend server and returns the JSON Response from the Status Response
      * wrapped in a <code>CompletableFuture</code> as this is done async
      * @param server a backend server from the proxy this is called on
-     * @return a <code>CompletableFuture</code> containing the JSON Response by the backend server containing the server information, which might be incomplete/invalid json
+     * @return a <code>CompletableFuture</code> containing the JSON Response by the backend server containing the server information, which might be incomplete/invalid JSON
      */
     public CompletableFuture<String> ping(RegisteredServer server){
         return CompletableFuture.supplyAsync(() -> {

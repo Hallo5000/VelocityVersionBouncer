@@ -143,8 +143,8 @@ public class Utils {
 
     /**
      * {@link #getPingFromHandshake(String, int, String, int, int, List, Component, Favicon, String, List) getPingFromHandshake()} but with pre-set defaults
-     * @param json the json string to parse the <code>ServerPing</code> from
-     * @return a server ping derived from the json string
+     * @param json the JSON string to parse the <code>ServerPing</code> from
+     * @return a server ping derived from the JSON string
      */
     public @NotNull ServerPing getPingFromHandshake(@NotNull String json){
         return getPingFromHandshake(json, -1, "", -1, -1, Collections.emptyList(), Component.empty(), null, "FML", Collections.emptyList());
