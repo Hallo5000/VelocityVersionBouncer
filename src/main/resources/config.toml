@@ -34,11 +34,10 @@ default-to-ping-passthrough = true
 ping-intervall = 300
 
 # If enabled this option ensures that whenever a client is kicked from a server (whether during login, via /kick, or for another reason),
-# they will be automatically redirected (bounced) to another server instead of being disconnected. (obviously if a client disconnects explicitly via leaving the server they will not be redirected)
+# they will be automatically redirected (bounced) to another server instead of being disconnected. If a client disconnects explicitly via leaving the server they will not be redirected.
+# The server the client was kicked from will be temporarily excluded from the fallback options.
+# This prevents the client from being sent back there during fallback-bouncing and therefore also preventing a possible infinite loop.
 enable-fallback-bouncing = true
-# If set to true, the server the client was kicked from will be temporarily excluded from fallback options,
-# preventing the client from being sent back there during fallback-bouncing.
-exclude-previous-server = false
 # When there is a valid server name in 'explicit-fallback-server' the plugin won't search for a new server and instead only tries the specified server.
 # Leave this empty, if you'd like to disable this option (also this is disabled when enable-fallback-bouncing is set to false).
 # WARNING: this will not check whether the versions match or not

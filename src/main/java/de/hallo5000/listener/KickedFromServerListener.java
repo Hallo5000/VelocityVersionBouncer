@@ -23,8 +23,7 @@ public class KickedFromServerListener {
         plugin.getLogger().info(plugin.getMessage("fallback-bouncing"));
         if(plugin.getToml().getBoolean("enable-fallback-bouncing")){
             if(plugin.getToml().getString("explicit-fallback-server").equalsIgnoreCase("")){ //there is no explicit fallback server
-                RegisteredServer serverToExclude = plugin.getToml().getBoolean("exclude-previous-server") ? e.getServer() : null;
-                plugin.getUtils().findMatchingServer(e.getPlayer(), serverToExclude)
+                plugin.getUtils().findMatchingServer(e.getPlayer(), e.getServer())
                         .whenComplete((s, t) -> {
                             if(s != null){
                                 plugin.getLogger().info(plugin.getMessage("connecting", s.getServerInfo().getName()));
