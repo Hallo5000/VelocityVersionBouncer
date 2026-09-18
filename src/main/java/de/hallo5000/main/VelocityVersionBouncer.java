@@ -97,6 +97,10 @@ public class VelocityVersionBouncer implements Languaged {
         backendPingService.start();
     }
 
+    /**
+     * Creates a <code>Toml</code> object from the plugins' default config and applies the user-defined settings to it.
+     * @return the <code>Toml</code> object
+     */
     private Toml loadConfig() {
         File dataFolder = dataDirectory.toFile();
         if(!dataFolder.exists() && !dataFolder.mkdirs()) logger.error(this.getMessage("cant-create-folder"));
@@ -113,6 +117,9 @@ public class VelocityVersionBouncer implements Languaged {
         }
     }
 
+    /**
+     * Reloads the plugins config (<code>plugins/velocityversionbouncer/config.toml</code>).
+     */
     private void reload(){
         toml = loadConfig();
         if(toml != null) lang = new LanguageManager(this, "languages", this.getToml().getString("language", "en_US"));
@@ -142,6 +149,10 @@ public class VelocityVersionBouncer implements Languaged {
         return toml;
     }
 
+    /**
+     * Gets the plugins name as written in the <code>@Plugin</code> annotation.
+     * @return the plugins name
+     */
     @Override
     public String getName() {
         return getClass().getAnnotation(Plugin.class).name();
@@ -157,10 +168,21 @@ public class VelocityVersionBouncer implements Languaged {
         return langLogger;
     }
 
+    /**
+     * Gets the according message from the selected language file (without modifying it).
+     * @param key the key for the translated message
+     * @return the message given for the specified key
+     */
     public String getMessage(String key) {
         return lang.getDefaultConfig().get(key);
     }
 
+    /**
+     * Uses {@link #getMessage(String)} to get a message from the selected language file and replaces its placeholders with the given Strings.
+     * @param key the key for the translated message
+     * @param replacements Strings replacing the given placeholders <code>{...}</code>
+     * @return the message with replaced placeholders
+     */
     public String getMessage(String key, String... replacements){
         String msg = getMessage(key);
         for(int i = 0; i < replacements.length; i++){

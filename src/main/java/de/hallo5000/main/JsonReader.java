@@ -9,13 +9,14 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 /**
- * This class provides a few methods to read values from json strings which can be broken (e.g. some part is missing at the end).
- * They will work as long as the existing part is proper json and the key and value of the entry that is searched exists.
- * It uses the Jakarta Streaming API
+ * This class provides methods to read values from JSON strings that may be truncated at the end.
+ * Values can be read as long as the relevant part is valid JSON and the requested key and its value are present in the input.
+ * It uses the Jakarta Streaming API.
  */
 public class JsonReader {
 
     private final VelocityVersionBouncer plugin;
+
     public JsonReader(VelocityVersionBouncer plugin){
         this.plugin = plugin;
     }
@@ -24,7 +25,7 @@ public class JsonReader {
      * Moves the parser according to the path array.
      * @param parser a <code>JsonParser</code> with the string to scan
      * @param path the path to find
-     * @return whether or no the JSON string from the parser contains the value at path
+     * @return whether the specified path (and the associated value) were found in the JSON
      */
     public boolean findKeyInJson(JsonParser parser, String[] path){
         if(path == null || path.length == 0) return false;
@@ -55,7 +56,7 @@ public class JsonReader {
     }
 
     /**
-     * When the parser is at the start of a json object/array this method moves the parser to the end of it
+     * When the parser is at the start of a JSON object/array this method moves the parser to the end of it.
      * @param parser the <code>JsonParser</code> to operate
      */
     private void skipElement(JsonParser parser){
@@ -71,10 +72,11 @@ public class JsonReader {
     }
 
     /**
-     * Reads an int from a json formatted string even if a part is missing at the end
+     * Reads an object from a JSON formatted string even if a part is missing at the end.
+     * Supported value types are <code>null</code>, <code>boolean</code>, <code>String</code> or <code>BigDecimal</code>.
      * @param json valid JSON as a string (can be not-finished)
      * @param path a string array containing every key in the path to the one trying to be found
-     * @return an <code>Optional</code> containing the value to the path or empty if not found or null
+     * @return an <code>Optional</code> containing the value at the specified path or empty if not found or the value is null
      */
     public Optional<Object> getObjectFromJson(String json, String[] path){
         if(json == null) return Optional.empty();
@@ -94,7 +96,7 @@ public class JsonReader {
     }
 
     /**
-     * Goes to the key specified by <code>path</code> and returns an <code>Optional</code> possibly containing a json object
+     * Goes to the key specified by <code>path</code> and returns an <code>Optional</code> possibly containing a JSON object.
      * @param json the JSON string to search the path in
      * @param path the path in the JSON string to find the JSON object at
      * @return an <code>Optional</code> containing the JSON object or <code>Optional.empty()</code> if no JSON object was found
@@ -116,7 +118,7 @@ public class JsonReader {
     }
 
     /**
-     * Builds a string containing the json object the <code>JsonParser</code> is at
+     * Builds a string containing the JSON object the <code>JsonParser</code> is at.
      * @param builder the <code>StringBuilder</code> to build the JSON string with
      * @param parser the <code>JsonParser</code> to get the JSON object from
      */
@@ -150,22 +152,54 @@ public class JsonReader {
         }
     }
 
+    /**
+     * Uses {@link #getObjectFromJson(String, String[])} and returns the value as {@link Boolean}.
+     * @param json the JSON from which the {@link Boolean} should be parsed
+     * @param path the path at which the parser should search
+     * @return an {@link Optional} containing the parsed {@link Boolean} or <code>Optional.empty()</code> if the value is not found, is null or is not a <code>boolean</code>
+     */
     public Optional<Boolean> getBooleanFromJson(String json, String[] path){
         return getObjectFromJson(json, path).map(o -> o instanceof Boolean ? (Boolean) o : null);
     }
 
+    /**
+     * Uses {@link #getObjectFromJson(String, String[])} and returns the value as {@link String}.
+     * @param json the JSON from which the {@link String} should be parsed
+     * @param path the path at which the parser should search
+     * @return an {@link Optional} containing the parsed {@link String} or <code>Optional.empty()</code> if the value is not found, is null or is not a <code>String</code>
+     */
     public Optional<String> getStringFromJson(String json, String[] path){
         return getObjectFromJson(json, path).map(o -> o instanceof String ? (String) o : null);
     }
 
+    /**
+     * Uses {@link #getObjectFromJson(String, String[])} and returns the value as {@link BigDecimal}.
+     * @param json the JSON from which the {@link BigDecimal} should be parsed
+     * @param path the path at which the parser should search
+     * @return an {@link Optional} containing the parsed {@link BigDecimal} or <code>Optional.empty()</code> if the value is not found, is null or is not a <code>BigDecimal</code>
+     */
     public Optional<BigDecimal> getBigDecimalFromJson(String json, String[] path){
         return getObjectFromJson(json, path).map(o -> o instanceof BigDecimal ? (BigDecimal) o : null);
     }
 
+    /**
+     * Calls {@link #getBigDecimalFromJson(String, String[])} and returns it as an {@code Optional<Integer>}.
+     * @param json the JSON from which the {@link Integer} should be parsed
+     * @param path the path at which the parser should search
+     * @return an {@link Optional} containing the parsed {@link Integer} or <code>Optional.empty()</code> if the value is not found, is null or is not an <code>Integer</code>
+     * @throws ArithmeticException if the JSON number cannot be represented exactly as an {@link Integer}
+     */
     public Optional<Integer> getIntegerFromJson(String json, String[] path){
         return getBigDecimalFromJson(json, path).map(BigDecimal::intValueExact);
     }
 
+    /**
+     * Calls {@link #getIntegerFromJson(String, String[])} and returns it as an {@link OptionalInt}.
+     * @param json the JSON from which the <code>int</code> should be parsed
+     * @param path the path at which the parser should search
+     * @return an {@link Optional} containing the parsed <code>int</code> or <code>Optional.empty()</code> if the value is not found, is null or is not an <code>int</code>
+     * @throws ArithmeticException if the JSON number cannot be represented exactly as an {@code int}
+     */
     public OptionalInt getIntFromJson(String json, String[] path){
         return getIntegerFromJson(json, path).map(OptionalInt::of).orElse(OptionalInt.empty());
     }

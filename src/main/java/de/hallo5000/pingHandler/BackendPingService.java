@@ -22,9 +22,9 @@ public class BackendPingService {
     private final PingHandler pingHandler;
 
     /**
-     * Initializes the internal Objects (the pingCache Map is initialized as <code>ConcurrentHashMap</code>
+     * Initializes the internal Objects (the pingCache Map is initialized as <code>ConcurrentHashMap</code>).
      * @param plugin an instance of the plugins main class
-     * @param server the main instance of <code>ProxyServer</code>
+     * @param server the main's instance of <code>ProxyServer</code>
      */
     public BackendPingService(VelocityVersionBouncer plugin, ProxyServer server){
         this.plugin = plugin;
@@ -34,7 +34,7 @@ public class BackendPingService {
     }
 
     /**
-     * Starts a scheduled task on repeat with <code>pingAll()</code> and registers a listener for the <code>ServerRegisteredEvent</code>.
+     * Schedules <code>pingAll()</code> to run periodically and registers a listener for the <code>ServerRegisteredEvent</code>.
      * Should only be used once per Plugin initialization.
      */
     public void start(){
@@ -46,7 +46,7 @@ public class BackendPingService {
     }
 
     /**
-     * Simply calls <code>ping()</code> on every backend server contained in <code>getAllServers()</code>
+     * Simply calls <code>ping()</code> on every backend server contained in <code>getAllServers()</code>.
      */
     public void pingAll(){
         plugin.getLogger().info(plugin.getMessage("ping-all"));
@@ -64,7 +64,7 @@ public class BackendPingService {
     }
 
     /**
-     * Pings the given server and puts the response in the internal ping cache
+     * Pings the given server and puts the response in the internal ping cache.
      * @param server the server to be pinged
      * @return a CompletableFuture with the ping response
      * @throws NullPointerException if the given <code>RegisteredServer</code> is null
@@ -92,7 +92,7 @@ public class BackendPingService {
     }
 
     /**
-     * Looks up the ping in the ping cache and returns the Protocol Version Number if present
+     * Looks up the ping in the ping cache and returns the Protocol Version Number if present.
      * @param server <code>RegisteredServer</code> to get the ping from
      * @return an OptionalInt containing the ping if present in the ping cache or else <code>OptionalInt.empty()</code>
      */
@@ -101,7 +101,7 @@ public class BackendPingService {
     }
 
     /**
-     * Getter for a <code>ServerPing</code> saved in the internal ping cache
+     * Getter for a <code>ServerPing</code> saved in the internal ping cache.
      * @param server the server whose ping to lookup
      * @return an <code>Optional<ServerPing></code> containing the servers ping response or empty if there was none the last time the server was pinged
      */
@@ -117,12 +117,18 @@ public class BackendPingService {
         pingCache.remove(server);
     }
 
+    /**
+     * Pings a server and caches the result, when the server is registered.
+     */
     @Subscribe
     public void onServerRegistered(ServerRegisteredEvent e){
         plugin.getLogger().info(plugin.getMessage("ping-new"));
         ping(e.registeredServer());
     }
 
+    /**
+     * Removes a server's cached ping, when the server is unregistered.
+     */
     @Subscribe
     public void onServerUnregistered(ServerUnregisteredEvent e){
         pingCache.remove(e.unregisteredServer());
