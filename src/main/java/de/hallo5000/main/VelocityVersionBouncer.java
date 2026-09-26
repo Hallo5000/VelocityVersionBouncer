@@ -31,10 +31,12 @@ TODO:
 - ViaVersion detect
 - set different log levels for each logging call (log-level in config)
 - check compatability with forced-hosts
+- 'BALANCED' routing for fallbacks
+- set permission for routes
 */
 
 
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "1.6.1-SNAPSHOT",
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "2.0.0-release",
         url = "https://github.com/Hallo5000/VelocityVersionBouncer",
         description = "This plugin redirects players to servers depending on their game version",
         authors = {"Hallo5000"})

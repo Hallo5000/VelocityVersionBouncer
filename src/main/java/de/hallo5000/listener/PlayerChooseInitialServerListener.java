@@ -6,8 +6,6 @@ import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import de.hallo5000.main.VelocityVersionBouncer;
 import net.kyori.adventure.text.Component;
 
-import java.util.*;
-
 public class PlayerChooseInitialServerListener {
 
     private final VelocityVersionBouncer plugin;

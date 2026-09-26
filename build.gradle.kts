@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.hallo5000"
-version = "1.6.1-SNAPSHOT"
+version = "2.0.0-release"
 
 repositories {
     mavenCentral()
@@ -19,19 +19,17 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
-    annotationProcessor("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
-    implementation("com.moandjiezana.toml:toml4j:0.7.1") // moved to https://mvnrepository.com/artifact/io.hotmoka/toml4j since 0.7.3 but GitHub repo shows 0.1.7 as latest
-    implementation("io.netty:netty-buffer:4.2.7.Final")
-    implementation("io.netty:netty-codec:4.2.7.Final")
-    implementation("io.netty:netty-transport:4.2.7.Final")
+    compileOnly("com.velocitypowered:velocity-api:4.2.1-SNAPSHOT")
+    annotationProcessor("com.velocitypowered:velocity-api:4.2.1-SNAPSHOT")
+    implementation("com.moandjiezana.toml:toml4j:0.7.2")
     implementation("jakarta.json:jakarta.json-api:2.1.3")
-    implementation("org.eclipse.parsson:jakarta.json:1.1.7")
+    implementation("org.eclipse.parsson:jakarta.json:1.1.9")
     implementation("de.themoep.utils:lang-velocity:1.3-SNAPSHOT")
+    compileOnly("com.google.code.findbugs:jsr305:3.0.2") //maybe switch to another nullability annotation library in the future
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(25))
 }
 
 tasks.jar {

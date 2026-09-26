@@ -16,11 +16,16 @@
 - **What happens if no compatible server is found?** The client will simply be disconnected with the according note/reason.
 - **Does this work with modded minecraft servers?** If you're using setups like Ambassador+ProxyCompatibleForge [(more information)](https://docs.papermc.io/velocity/server-compatibility) this plugin will route the client based purely on their protocol version (game version), not their installed mods. _Note: This setup has only been tested with PaperMC and (Neo)Forge servers._
 ### 📦 Installation & 🛠️ Requirements
-1. Download the `.jar` file of the last stable release ([here](https://github.com/Hallo5000/VelocityVersionBouncer/blob/master/build/libs/VelocityVersionBouncer-1.6.0-release.jar)) or build it yourself (the Gradle files are included).
+1. Download the `.jar` file of the last stable release ([here](https://github.com/Hallo5000/VelocityVersionBouncer/blob/master/build/libs/VelocityVersionBouncer-2.0.0-release.jar)) or build it yourself (the Gradle files are included).
 2. Put the file in your servers `plugins/` folder (only the proxy!) and restart the server once to generate the config file at `plugins/velocityversionbouncer/config.toml`.
 3. When you're finished editing the config restart the proxy once more and everything should be working.
-_Note: this plugin may not work properly if you are not running on `Java 21` (or higher) and `Velocity 3.4.0` or above_
+_Note: This plugin may not work properly if you are not running on `Java 25` (or higher) and `Velocity 4.2.1` (or higher)._
 4. If you're having problems: make sure you're not using a snapshot (as these are expected to be unstable and this README is always explaining the latest release anyway), if there's still a problem feel free to open an issue on the plugins GitHub repository.
+
+### Compatability
+- **VelocityVersionBouncer** is build for the [Velocity proxy](https://github.com/PaperMC/velocity) (other proxies or forks may work, but they are not officially supported).
+- Before `v2.X.X` VelocityVersionBouncer was compiled against `Java 21` and `Velocity 3.4.0`, so to support `Java 21` or `Velocity 3.4.0 - 4.2.1` you may need to downgrade VelocityVersionBouncer to `1.6.0-release` or `1.6.1-SNAPSHOT`.
+- You can of course also fork the project and compile against other versions. Most parts should work exactly the same.
 
 ## Example Config:
 ```toml
