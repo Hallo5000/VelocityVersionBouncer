@@ -186,8 +186,8 @@ public class Utils {
                 return CompletableFuture.completedFuture(null);
             }));
         }
-        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).handle((v, t) -> v)
-                .thenApply((v) -> {
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).handle((v, _) -> v)
+                .thenApply((_) -> {
             //start checking servers for matches
             for(RegisteredServer s : servers){
                 if(serverToExclude != null && s == serverToExclude){

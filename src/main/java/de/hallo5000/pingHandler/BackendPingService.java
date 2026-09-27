@@ -60,7 +60,7 @@ public class BackendPingService {
             }
         }).delay(plugin.getToml().getLong("ping-intervall"), TimeUnit.SECONDS).schedule();
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).whenComplete(
-                (v, e) -> plugin.getLogger().info(plugin.getMessage("ping-complete")));
+                (_, _) -> plugin.getLogger().info(plugin.getMessage("ping-complete")));
     }
 
     /**
