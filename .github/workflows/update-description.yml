@@ -1,0 +1,11 @@
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: something
+        run: echo TODO

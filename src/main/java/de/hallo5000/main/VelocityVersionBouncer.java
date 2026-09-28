@@ -32,11 +32,10 @@ import java.util.logging.Level;
 
 /*
 TODO:
-- workflows triggered by new releases
-- ViaVersion detect
+- workflows triggered by new releases (IN PROGRESS)
+- ViaVersion detect (+version ranges)
 - set different log levels for each logging call (log-level in config)
 - check compatability with forced-hosts
-- 'BALANCED' routing for fallbacks
 - set permission for routes
 */
 
