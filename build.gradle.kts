@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.hallo5000"
-version = "2.0.0-release"
+version = "2.1.0-release"
 
 repositories {
     mavenCentral()

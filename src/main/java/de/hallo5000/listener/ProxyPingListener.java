@@ -32,7 +32,7 @@ public class ProxyPingListener {
         }
 
         plugin.getLogger().info(plugin.getMessage("ping-incoming"));
-        plugin.getUtils().findMatchingServer(e.getConnection(), null)
+        plugin.getUtils().findMatchingServer(e.getConnection())
                 .whenComplete((s, t) -> {
                     if(s != null){
                         plugin.getBackendPingService().getPing(s).ifPresentOrElse((ping) ->{

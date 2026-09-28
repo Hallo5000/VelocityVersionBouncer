@@ -20,8 +20,22 @@ public class KickedFromServerListener {
 
     @Subscribe
     public void onPlayerKick(KickedFromServerEvent e, Continuation continuation){
-        plugin.getLogger().info(plugin.getMessage("fallback-bouncing"));
+        //bouncing if the last matching server didn't work
+        if(plugin.clientCache.containsKey(e.getPlayer().getSessionId())){
+            plugin.clientCache.get(e.getPlayer().getSessionId()).add(e.getServer());
+            RegisteredServer[] serversToExclude = plugin.clientCache.get(e.getPlayer().getSessionId()).toArray(RegisteredServer[]::new);
+            plugin.getUtils().findMatchingServer(e.getPlayer(), serversToExclude).whenComplete((newServer, t) -> {
+                if(e.getPlayer().isActive()){//not sure if this check is actually needed
+                    if(t != null) e.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text(plugin.getMessage("no-matching-server-player"))));
+                    else e.setResult(KickedFromServerEvent.RedirectPlayer.create(newServer, Component.empty()));
+                    continuation.resume();
+                }
+            });
+            return;
+        }
+        // fallback functionality
         if(plugin.getToml().getBoolean("enable-fallback-bouncing")){
+            plugin.getLogger().info(plugin.getMessage("fallback-bouncing"));
             if(plugin.getToml().getString("explicit-fallback-server").equalsIgnoreCase("")){ //there is no explicit fallback server
                 plugin.getUtils().findMatchingServer(e.getPlayer(), e.getServer())
                         .whenComplete((s, t) -> {
@@ -38,7 +52,6 @@ public class KickedFromServerListener {
                             if(t != null) continuation.resumeWithException(t);
                             else continuation.resume();
                         });
-                return;
             }else{
                 Optional<RegisteredServer> fallback = plugin.getServer().getServer(plugin.getToml().getString("explicit-fallback-server"));
                 if(fallback.isEmpty()){ //fallback is misconfigured (maybe typo; fallback is not registered)
@@ -76,8 +89,8 @@ public class KickedFromServerListener {
                     }
                     continuation.resume();
                 }));
-                return;
             }
+            return;
         }
         continuation.resume();
     }

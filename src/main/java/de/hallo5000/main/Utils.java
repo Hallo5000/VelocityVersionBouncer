@@ -154,10 +154,10 @@ public class Utils {
      * First checks if there is an explicit routing in the config with a matching protocol/game version and/or client brand.
      * When there is no explicit routing it checks every server specified by whitelist and blacklist. The first server found by this method will be returned.
      * @param client player to find a matching server for
-     * @param serverToExclude <code>RegisteredServer</code> to be excluded from checking (could be <code>null</code> to exclude none)
+     * @param serversToExclude <code>RegisteredServer</code> to be excluded from checking (could be not given to exclude none)
      * @return a server with matching protocol version (the <code>RegisteredServer</code> inside the <code>CompletableFuture</code> can be <code>null</code> if no server was found or <code>client</code> is <code>null</code>)
      */
-    public @NotNull CompletableFuture<RegisteredServer> findMatchingServer(@Nullable InboundConnection client, @Nullable RegisteredServer serverToExclude){
+    public @NotNull CompletableFuture<RegisteredServer> findMatchingServer(@Nullable InboundConnection client, @NotNull RegisteredServer... serversToExclude){
         if(client == null) return CompletableFuture.completedFuture(null);
         RegisteredServer match = plugin.getUtils().checkForExplicitRouting(client);
         if(match != null) {
@@ -190,7 +190,7 @@ public class Utils {
                 .thenApply((_) -> {
             //start checking servers for matches
             for(RegisteredServer s : servers){
-                if(serverToExclude != null && s == serverToExclude){
+                if(Arrays.asList(serversToExclude).contains(s)){
                     plugin.getLogger().info(plugin.getMessage("server-excluded", s.getServerInfo().getName()));
                 }else if(plugin.getBackendPingService().getProtocol(s).isEmpty()){
                     plugin.getLogger().info(plugin.getMessage("server-unavailable", s.getServerInfo().getName()));
@@ -205,6 +205,9 @@ public class Utils {
                 return null;
             }
             while(!matches.isEmpty()){
+                if(matches.stream().anyMatch(m -> plugin.getToml().getList("modded-servers").contains(m.getServerInfo().getName()))){
+                    matches.removeIf(m -> !plugin.getToml().getList("modded-servers").contains(m.getServerInfo().getName()));
+                }
                 //needs to be changed if more than two distribution modes are implemented
                 RegisteredServer finalServer = matches.getFirst();
                 if("BALANCED".equalsIgnoreCase(plugin.getToml().getString("distribution"))){

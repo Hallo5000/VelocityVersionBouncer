@@ -9,6 +9,8 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
+import de.hallo5000.listener.ClientCacheUpdateEvents;
 import de.hallo5000.listener.KickedFromServerListener;
 import de.hallo5000.listener.PlayerChooseInitialServerListener;
 import de.hallo5000.listener.ProxyPingListener;
@@ -22,6 +24,9 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.UUID;
 import java.util.logging.Level;
 
 
@@ -36,7 +41,7 @@ TODO:
 */
 
 
-@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "2.0.0-release",
+@Plugin(id = "velocityversionbouncer", name = "VelocityVersionBouncer", version = "2.1.0-release",
         url = "https://github.com/Hallo5000/VelocityVersionBouncer",
         description = "This plugin redirects players to servers depending on their game version",
         authors = {"Hallo5000"})
@@ -51,6 +56,8 @@ public class VelocityVersionBouncer implements Languaged {
     private final JsonReader jsonReader;
     private final BackendPingService backendPingService;
     private Toml toml;
+
+    public HashMap<UUID, HashSet<RegisteredServer>> clientCache = new HashMap<>();
 
     @Inject
     public VelocityVersionBouncer(ProxyServer server, @SuppressWarnings("unused") Logger logger, @DataDirectory Path dataDirectory) {
@@ -89,6 +96,7 @@ public class VelocityVersionBouncer implements Languaged {
         server.getEventManager().register(this, new PlayerChooseInitialServerListener(this));
         server.getEventManager().register(this, new KickedFromServerListener(this));
         server.getEventManager().register(this, new ProxyPingListener(this));
+        server.getEventManager().register(this, new ClientCacheUpdateEvents(this));
 
         CommandManager cmdManager = server.getCommandManager();
         CommandMeta cmdMeta = cmdManager.metaBuilder("velocityversionbouncer").aliases("vvb").plugin(this).build();

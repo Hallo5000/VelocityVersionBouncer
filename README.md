@@ -14,7 +14,7 @@
 ### ❓ Questions you may have:
 - **Is this also triggered when changing servers via `/server`?** No, the version checking is only triggered when connecting initially (from the multiplayer server list) or when using the fallback functionality.
 - **What happens if no compatible server is found?** The client will simply be disconnected with the according note/reason.
-- **Does this work with modded Minecraft servers?** If you're using setups like Ambassador+ProxyCompatibleForge [(more information)](https://docs.papermc.io/velocity/server-compatibility) this plugin will route the client based purely on their protocol version (game version), not their installed mods. _Note: This setup has only been tested with PaperMC and (Neo)Forge servers._
+- **Does this work with modded Minecraft servers?** If you're using setups like Ambassador+ProxyCompatibleForge [(more information)](https://docs.papermc.io/velocity/server-compatibility) this plugin will route the client based on their protocol version (game version) and also checks whether the installed mods are accepted by the backend servers.
 ### 📦 Installation & 🛠️ Requirements
 1. Download the `.jar` file of the last stable release ([here](https://github.com/Hallo5000/VelocityVersionBouncer/blob/master/build/libs/VelocityVersionBouncer-2.0.0-release.jar)) or build it yourself (the Gradle files are included).
 2. Put the file in your server's `plugins/` folder (only the proxy!) and restart the server once to generate the config file at `plugins/velocityversionbouncer/config.toml`.
@@ -38,11 +38,15 @@ language = "en_US"
 # leaving this empty is equal to putting all registered servers in
 # Example: ["server1", "server2"]
 # Note: spaces outside the strings will be ignored.
-whitelist = ["lobby1", "lobby2", "fun-minigame", "devServer"]
+whitelist = ["lobby1", "lobby2", "fun-minigame", "devServer", "best-modpack"]
 
 # 'blacklist' is an array of strings to exclude from the temporary list of servers during version comparison.
 # first the whitelist is added and then all servers contained in the blacklist are removed from that temporary list.
 blacklist = ["devServer"]
+
+# 'modded-servers' is an array of servers from the whitelist, which are tried before the unmodded servers to ensure,
+# that modded clients don't end up on vanilla servers.
+modded-servers = ["best-modpack"]
 
 # If enabled this option ensures that joining players will be distributed evenly over all servers
 # Options: (case-insensitive)

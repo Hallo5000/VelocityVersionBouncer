@@ -6,6 +6,8 @@ import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import de.hallo5000.main.VelocityVersionBouncer;
 import net.kyori.adventure.text.Component;
 
+import java.util.HashSet;
+
 public class PlayerChooseInitialServerListener {
 
     private final VelocityVersionBouncer plugin;
@@ -16,8 +18,10 @@ public class PlayerChooseInitialServerListener {
 
     @Subscribe
     public void onPlayerChooseInitialServer(PlayerChooseInitialServerEvent e, Continuation continuation){
+        plugin.clientCache.put(e.getPlayer().getSessionId(), new HashSet<>());
+
         plugin.getLogger().info(plugin.getMessage("initial-join"));
-        plugin.getUtils().findMatchingServer(e.getPlayer(), null)
+        plugin.getUtils().findMatchingServer(e.getPlayer())
                 .whenComplete((s, t) -> {
                     if(s != null){
                         plugin.getLogger().info(plugin.getMessage("connecting", s.getServerInfo().getName()));

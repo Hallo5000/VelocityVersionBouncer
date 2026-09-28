@@ -13,6 +13,10 @@ whitelist = []
 # first the whitelist is added and then all servers contained in the blacklist are removed from that temporary list.
 blacklist = []
 
+# 'modded-servers' is an array of servers from the whitelist, which are tried before the unmodded servers to ensure,
+# that modded clients don't end up on vanilla servers.
+modded-servers = []
+
 # If enabled this option ensures that joining players will be distributed evenly over all servers
 # Options: (case-insensitive)
 #   "FIRST-MATCH" - players will be sent to the first matching server
