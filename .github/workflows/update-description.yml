@@ -4,8 +4,63 @@ on:
       - master
 
 jobs:
-  publish-readme:
+  save-current-readme:
+    runs-on: ubuntu-latest
+    outputs:
+      readme: ${{ steps.readme.outputs.readme }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Check for README updates
+        id: check
+        run: |
+          # uses the exit code of git diff
+          if git diff --quiet "${{ github.event.before }}" "${{ github.sha }}" -- README.md; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Create output
+        id: readme
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          {
+            echo 'readme<<UNIQUE_DELIMITER'
+            cat README.md
+            echo 'UNIQUE_DELIMITER'
+          } >> "$GITHUB_OUTPUT"
+  publish-readme-to-hangar:
+    needs: save-current-readme
+    if: needs.save-current-readme.outputs.readme != ''
     runs-on: ubuntu-latest
     steps:
-      - name: something
-        run: echo TODO
+      - name: Publish README
+        env:
+          HANGAR_TOKEN: ${{ secrets.HANGAR_TOKEN }}
+          README: ${{ needs.save-current-readme.outputs.readme }}
+        run: |
+          json_body=$(jq -n --arg content "$README" '{content: $content}')
+          
+          curl --fail-with-body --silent --show-error -X PATCH "https://hangar.papermc.io/api/v1/pages/editmain/VelocityVersionBouncer" \
+           -H 'authorization: Bearer $HANGAR_TOKEN'\
+           -H 'content-type: application/json' \
+           -d "$json_body"
+  publish-readme-to-modrinth:
+    needs: save-current-readme
+    if: needs.save-current-readme.outputs.readme != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish README
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          README: ${{ needs.save-current-readme.outputs.readme }}
+        run: |
+          json_body=$(jq -n --arg body "$README" '{body: $body}')
+          
+          # Update project description
+          curl --fail-with-body --silent --show-error -X PATCH https://api.modrinth.com/v2/project/X5ETMik1 \
+            -H "Authorization: Bearer $MODRINTH_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$json_body"

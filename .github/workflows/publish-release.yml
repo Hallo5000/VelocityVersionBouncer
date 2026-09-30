@@ -23,7 +23,7 @@ jobs:
             printf '%s\n' "$RELEASE_BODY"
             echo 'UNIQUE_DELIMITER'
           } >> "$GITHUB_OUTPUT"
-      - name: Release of Snapshot?
+      - name: Release or Snapshot?
         id: type
         run: |
           if [ "${{ github.event.release.prerelease }}" == "true" ]; then 
