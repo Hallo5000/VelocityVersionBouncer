@@ -37,6 +37,7 @@ TODO:
 - set different log levels for each logging call (log-level in config)
 - check compatability with forced-hosts
 - set permission for routes
+- distinguish between "no routing" and "the server from the routing is not found" in checkForExplicitRouting
 */
 
 

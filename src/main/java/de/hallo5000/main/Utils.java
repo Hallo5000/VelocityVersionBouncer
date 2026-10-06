@@ -63,25 +63,19 @@ public class Utils {
         
         Map<String, Object> explicitRoutings = new LinkedHashMap<>(plugin.getToml().getTable("explicit-routing").toMap());
         //removes all invalid explicit routings
-        for(String s : explicitRoutings.keySet()){
-            if(s.isEmpty() || !s.matches("^(?=[pvc])((p\\d{3})|(v\\d+_\\d+(_\\d+)?))?(c\\S+)?$")) explicitRoutings.remove(s);
-        }
-        //removes all explicit routings with unmatching client brands
-        for(String s : new HashSet<>(explicitRoutings.keySet())){
-            if(s.contains("c") && !s.endsWith("c"+clientBrand)) explicitRoutings.remove(s);
-        }
+        explicitRoutings.keySet().removeIf(s -> !s.matches("^(?=[pvc])((p\\d{1,3})|(v\\d+_\\d+(_\\d+)?))?(c\\S+)?$"));
 
         //matching protocol version + client brand
         String serverName = (String) explicitRoutings.get("p"+protocol+"c"+clientBrand);
         if(serverName != null) return plugin.getServer().getServer(serverName).orElse(null);
         //matching protocol version without client brand
-        serverName = (String) explicitRoutings.get("p"+protocol+"c"+clientBrand);
+        serverName = (String) explicitRoutings.get("p"+protocol);
         if(serverName != null) return plugin.getServer().getServer(serverName).orElse(null);
 
         //matching game versions + client brand
         for(String v : inboundConnection.getProtocolVersion().getVersionsSupportedBy().stream().map(s -> s.replace('.', '_')).toList()){
-                serverName = (String) explicitRoutings.get("v"+v+"c"+clientBrand);
-                if(serverName != null) return plugin.getServer().getServer(serverName).orElse(null);
+            serverName = (String) explicitRoutings.get("v"+v+"c"+clientBrand);
+            if(serverName != null) return plugin.getServer().getServer(serverName).orElse(null);
         }
         //matching game versions without client brand
         for(String v : inboundConnection.getProtocolVersion().getVersionsSupportedBy().stream().map(s -> s.replace('.', '_')).toList()){
